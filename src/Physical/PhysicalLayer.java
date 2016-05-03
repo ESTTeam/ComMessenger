@@ -8,6 +8,9 @@ import java.util.TooManyListenersException;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Created by Саша on 29.04.2016.
+ */
 public class PhysicalLayer {
     private final PortService portService;
 
@@ -26,6 +29,8 @@ public class PhysicalLayer {
     private InputStream inputStream;
 
     private boolean inUse;
+
+    private boolean isCurrentStation;
 
     public PhysicalLayer nextStation;
 
@@ -97,6 +102,9 @@ public class PhysicalLayer {
         SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
         if (nextStationPortForReceive != null)
             nextStation.startAsIntermediate(nextStationPortForReceive);
+        else
+            nextStation.markAsInUse();
+
         try {
             outputStream.write(data);
             outputStream.flush();
@@ -123,6 +131,12 @@ public class PhysicalLayer {
     }
 
     public boolean inUse() { return inUse; }
+
+    public boolean isCurrentStation() { return isCurrentStation; }
+
+    public void markAsInUse() { inUse = true; }
+
+    public void markAsCurrentStation() { isCurrentStation = true; }
 
     public InputStream getInputStream() { return inputStream; }
 }

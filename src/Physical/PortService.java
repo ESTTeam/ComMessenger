@@ -3,6 +3,9 @@ package Physical;
 import javax.comm.*;
 import java.util.Enumeration;
 
+/**
+ * Created by Саша on 28.04.2016.
+ */
 public class PortService {
 
     private static final int TIMEOUT = 2000;

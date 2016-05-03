@@ -7,6 +7,9 @@ import java.io.IOException;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Created by Саша on 29.04.2016.
+ */
 public class PortListener implements SerialPortEventListener {
     PhysicalLayer physicalLayer;
 
@@ -33,7 +36,7 @@ public class PortListener implements SerialPortEventListener {
                     physicalLayer.sendDataToNextStation(receivedMessage);
                     physicalLayer.closePortForReceive();
                     physicalLayer.closePortForSend();
-                } else {
+                } else if (physicalLayer.isCurrentStation()){
                     byte[] receivedMessage = physicalLayer.receiveDataFromPreviousStation();
                     //dataLinkLayer.receiveDataFromPhysicalLayer(receivedMessage);
                     System.out.println(new String(receivedMessage));
