@@ -79,12 +79,12 @@ public class PhysicalLayer {
         } catch (IOException | TooManyListenersException e) {}
     }
 
-    public void setSendPortParameters(int baudrate, int dataBits, int stopBits, int parity) {
-        portService.setPortParameters(portForSend, baudrate, dataBits, stopBits, parity);
+    public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        portService.setPortParameters(portForSend, baudRate, dataBits, stopBits, parity);
     }
 
-    public void setRecievePortParameters(int baudrate, int dataBits, int stopBits, int parity) {
-        portService.setPortParameters(portForReceive, baudrate, dataBits, stopBits, parity);
+    public void setReceivePortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        portService.setPortParameters(portForReceive, baudRate, dataBits, stopBits, parity);
     }
 
     public synchronized void closePortForSend() { portService.closePort(portForSend); }

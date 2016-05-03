@@ -32,11 +32,11 @@ public class PortService {
         System.out.println("Port " + port.getName() + " closed!");
     }
 
-    public void setPortParameters(SerialPort port, int baudrate, int dataBits, int stopBits, int parity) {
+    public void setPortParameters(SerialPort port, int baudRate, int dataBits, int stopBits, int parity) {
         try {
-            port.setSerialPortParams(baudrate, dataBits, stopBits, parity);
-            System.out.append(port.getName()).append(" parameters cnanged: ");
-            System.out.append("baudrate = " + baudrate);
+            port.setSerialPortParams(baudRate, dataBits, stopBits, parity);
+            System.out.append(port.getName()).append(" parameters changed: ");
+            System.out.append("baud rate = " + baudRate);
             System.out.append(", data bits = " + dataBits);
             System.out.append(", stop bits = " + stopBits);
             System.out.append(", parity = " + parity + "\n");

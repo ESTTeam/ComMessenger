@@ -2,7 +2,6 @@ package Physical;
 
 import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
-
 import java.io.IOException;
 
 import static java.lang.Thread.sleep;
