@@ -13,9 +13,7 @@ public class Encoder {
         for (int i = 0; i < msg.length; ++i) {
             binaryMsg[i] = toBinary(msg[i]);
             int[] supplementedVector = divide(binaryMsg[i]);
-            for (int j = ORIGINAL_BIT; j < ENCODED_BIT; ++j) {
-                binaryMsg[i][j] = supplementedVector[j];
-            }
+            System.arraycopy(supplementedVector, ORIGINAL_BIT, binaryMsg[i], ORIGINAL_BIT, ENCODED_BIT - ORIGINAL_BIT);
         }
 
         return msg;
@@ -35,6 +33,10 @@ public class Encoder {
         return vector;
     }
 
+    private static byte toDecimal(int[] source) {
+        return 0;
+    }
+
     private static int[] divide(int[] vector) {
         int[] result = new int[ENCODED_BIT];
         System.arraycopy(vector, 0, result, 0, vector.length);
@@ -42,7 +44,7 @@ public class Encoder {
         for (int i = 0; i < ORIGINAL_BIT; ++i) {
             if (result[i] >= mGeneratorPolynomial[0]) {
                 for (int j = i; j < mGeneratorPolynomial.length + i; ++j) {
-                    result[j] = divideMod2(vector[j], mGeneratorPolynomial[j - i]);
+                    result[j] = divideMod2(result[j], mGeneratorPolynomial[j - i]);
                 }
             }
         }
