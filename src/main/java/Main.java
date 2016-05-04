@@ -1,4 +1,4 @@
-import link.DataLinkLayer;
+import link.Encoder;
 import physical.PhysicalLayer;
 
 import java.util.HashMap;
@@ -10,9 +10,11 @@ public class Main {
     private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
 
     public static void main(String[] args) {
-        DataLinkLayer ws = new DataLinkLayer(0);
+        Encoder.encode("ABCD".getBytes());
 
-        ws.sendDataTo(4, "Data for 5 ws");
+//        DataLinkLayer ws = new DataLinkLayer(0);
+//
+//        ws.sendDataTo(4, "Data for 5 ws");
     }
 
     public static PhysicalLayer getNextStation(PhysicalLayer physicalLayer) {

@@ -1,6 +1,6 @@
 package physical;
 
-import link.OnReceiveListener;
+import link.OnPacketReceiveListener;
 
 import javax.comm.SerialPort;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.TooManyListenersException;
 public class PhysicalLayer {
     private final PortService portService;
 
-    private final OnReceiveListener dataLinkLayer;
+    private final OnPacketReceiveListener dataLinkLayer;
 
     private SerialPort portForSend;
 
@@ -32,7 +32,7 @@ public class PhysicalLayer {
     public PhysicalLayer nextStation;
 
 
-    public PhysicalLayer(OnReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
+    public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
         this.dataLinkLayer = dataLinkLayer;
         this.portService = portService;
         this.portForSendName = portForSendName;
@@ -114,7 +114,7 @@ public class PhysicalLayer {
         int offset = 0;
         byte[] symbol = new byte[1];
         try {
-            byte[] message = new byte[portForReceive.getDataBits() + 15];
+            byte[] message = new byte[portForReceive.getDataBits() + 45];
             while (symbol[0] != '\n') {
                 inputStream.read(symbol, 0, 1);
                 if (symbol[0] != 0) {

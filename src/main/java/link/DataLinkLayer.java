@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO: add getNextStation()
-public class DataLinkLayer implements OnReceiveListener {
+public class DataLinkLayer implements OnPacketReceiveListener {
 
     private int mId;
     private PhysicalLayer physicalLayer;
@@ -45,11 +45,11 @@ public class DataLinkLayer implements OnReceiveListener {
 
     public void sendDataTo(int destinationId, String data) {
         Message msg = new Message(destinationId, mId, data);
-        physicalLayer.sendDataToNextStation(jsonToBytes(msg.getJson()));
+        physicalLayer.sendDataToNextStation(Encoder.encode(jsonToBytes(msg.getJson())));
     }
 
     @Override
-    public void onReceive(byte[] bytes) {
+    public void onPacketReceive(byte[] bytes) {
         try {
             Message msg = new Message(bytesToJSON(bytes));
             if (msg.getDestinationId() == mId) {
