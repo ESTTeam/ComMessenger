@@ -1,4 +1,4 @@
-package Physical;
+package physical;
 
 import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
@@ -6,9 +6,6 @@ import java.io.IOException;
 
 import static java.lang.Thread.sleep;
 
-/**
- * Created by Саша on 29.04.2016.
- */
 public class PortListener implements SerialPortEventListener {
     PhysicalLayer physicalLayer;
 

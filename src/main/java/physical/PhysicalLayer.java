@@ -1,4 +1,4 @@
-package Physical;
+package physical;
 
 import javax.comm.SerialPort;
 import java.io.IOException;
@@ -8,9 +8,6 @@ import java.util.TooManyListenersException;
 
 import static java.lang.Thread.sleep;
 
-/**
- * Created by Саша on 29.04.2016.
- */
 public class PhysicalLayer {
     private final PortService portService;
 
