@@ -1,7 +1,9 @@
-/.idea/workspace.xml
-
 # Class files #
 *.class
+
+# .idea files #
+/.idea/workspace.xml
+/.idea/libraries
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
