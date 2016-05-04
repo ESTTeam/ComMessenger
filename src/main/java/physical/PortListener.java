@@ -1,15 +1,20 @@
 package physical;
 
+import link.OnReceiveListener;
+
 import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
 import java.io.IOException;
 
-import static java.lang.Thread.sleep;
-
 public class PortListener implements SerialPortEventListener {
     PhysicalLayer physicalLayer;
+    OnReceiveListener dataLinkLayer;
 
-    public PortListener(PhysicalLayer physicalLayer) { this.physicalLayer = physicalLayer; }
+    public PortListener(PhysicalLayer physicalLayer, OnReceiveListener dataLinkLayer)
+    {
+        this.physicalLayer = physicalLayer;
+        this.dataLinkLayer = dataLinkLayer;
+    }
 
     @Override
     public void serialEvent(SerialPortEvent event) {
@@ -34,7 +39,7 @@ public class PortListener implements SerialPortEventListener {
                     physicalLayer.closePortForSend();
                 } else if (physicalLayer.isCurrentStation()){
                     byte[] receivedMessage = physicalLayer.receiveDataFromPreviousStation();
-                    //dataLinkLayer.receiveDataFromPhysicalLayer(receivedMessage);
+                    dataLinkLayer.onReceive(receivedMessage);
                     System.out.println(new String(receivedMessage));
                 }
                 break;

@@ -1,17 +1,17 @@
 package physical;
 
+import link.OnReceiveListener;
+
 import javax.comm.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
 
-import static java.lang.Thread.sleep;
-
 public class PhysicalLayer {
     private final PortService portService;
 
-    // private final DataLinkLayer dataLinkLayer;
+    private final OnReceiveListener dataLinkLayer;
 
     private SerialPort portForSend;
 
@@ -32,8 +32,8 @@ public class PhysicalLayer {
     public PhysicalLayer nextStation;
 
 
-    public PhysicalLayer(/*DataLinkLayer dataLinkLayer,*/ PortService portService, String portForSendName, String portForReceiveName) {
-        // this.dataLinkLayer = dataLinkLayer;
+    public PhysicalLayer(OnReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
+        this.dataLinkLayer = dataLinkLayer;
         this.portService = portService;
         this.portForSendName = portForSendName;
         this.portForReceiveName = portForReceiveName;
@@ -44,7 +44,7 @@ public class PhysicalLayer {
         portForSend = portService.openPort(portForSendName);
         try {
             outputStream = portForSend.getOutputStream();
-            portForSend.addEventListener(new PortListener(this));
+            portForSend.addEventListener(new PortListener(this, dataLinkLayer));
             portForSend.notifyOnDSR(true);
             portForSend.notifyOnBreakInterrupt(true);
             portForSend.notifyOnCarrierDetect(true);
@@ -53,7 +53,7 @@ public class PhysicalLayer {
         portForReceive = portService.openPort(portForReceiveName);
         try {
             inputStream = portForReceive.getInputStream();
-            portForReceive.addEventListener(new PortListener(this));
+            portForReceive.addEventListener(new PortListener(this, dataLinkLayer));
             portForReceive.notifyOnDataAvailable(true);
             portForReceive.notifyOnBreakInterrupt(true);
             portForReceive.notifyOnCarrierDetect(true);
@@ -71,7 +71,7 @@ public class PhysicalLayer {
         this.portForReceive = portForReceive;
         try {
             inputStream = portForReceive.getInputStream();
-            portForReceive.addEventListener(new PortListener(this));
+            portForReceive.addEventListener(new PortListener(this, dataLinkLayer));
             portForReceive.notifyOnDataAvailable(true);
         } catch (IOException | TooManyListenersException e) {}
     }
