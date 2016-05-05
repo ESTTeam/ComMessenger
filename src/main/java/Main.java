@@ -1,5 +1,6 @@
 import link.encoding.Decoder;
 import link.encoding.Encoder;
+import link.encoding.TransmissionFailedException;
 import physical.PhysicalLayer;
 
 import java.util.HashMap;
@@ -13,7 +14,12 @@ public class Main {
     public static void main(String[] args) {
         byte[] msg = "Hello, how are you?".getBytes();
         byte[] receivedMsg = Encoder.encode(msg);
-        byte[] decodedMsg = Decoder.decode(receivedMsg);
+        byte[] decodedMsg = new byte[0];
+        try {
+            decodedMsg = Decoder.decode(receivedMsg);
+        } catch (TransmissionFailedException e) {
+            System.out.println("Ошибка при передаче");
+        }
         System.out.print(new String(decodedMsg));
 
 //        DataLinkLayer ws = new DataLinkLayer(0);

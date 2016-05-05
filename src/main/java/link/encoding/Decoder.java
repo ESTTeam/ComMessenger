@@ -2,13 +2,15 @@ package link.encoding;
 
 public class Decoder extends Coder {
 
-    // TODO: add throwing exception
-    public static byte[] decode(byte[] msg) {
+    public static byte[] decode(byte[] msg) throws TransmissionFailedException {
         int[][] binaryMsg = new int[msg.length][ENCODED_BIT];
 
         int[][] decodedBinaryMsg = new int[msg.length][ORIGINAL_BIT];
         for (int i = 0; i < msg.length; ++i) {
             binaryMsg[i] = toBinary(msg[i]);
+            if (hasError(binaryMsg[i])) {
+                throw new TransmissionFailedException();
+            }
             System.arraycopy(binaryMsg[i], 0, decodedBinaryMsg[i], 0, ORIGINAL_BIT);
         }
 
@@ -42,5 +44,16 @@ public class Decoder extends Coder {
         }
 
         return result;
+    }
+
+    private static boolean hasError(int[] vector) {
+        int[] supplementedVector = divide(vector);
+        for (int i = ORIGINAL_BIT; i < ENCODED_BIT; ++i) {
+            if (supplementedVector[i] != 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
