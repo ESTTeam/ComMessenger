@@ -11,7 +11,7 @@ public class Main {
     private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
 
     public static void main(String[] args) {
-        byte[] msg = "ABCD".getBytes();
+        byte[] msg = "Hello, how are you?".getBytes();
         byte[] receivedMsg = Encoder.encode(msg);
         byte[] decodedMsg = Decoder.decode(receivedMsg);
         System.out.print(new String(decodedMsg));
