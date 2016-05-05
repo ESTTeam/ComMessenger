@@ -1,5 +1,9 @@
 package link;
 
+import link.encoding.Decoder;
+import link.encoding.Encoder;
+import link.encoding.TransmissionFailedException;
+import link.packing.Packer;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -45,34 +49,36 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     public void sendDataTo(int destinationId, String data) {
         Message msg = new Message(destinationId, mId, data);
-        physicalLayer.sendDataToNextStation(jsonToBytes(msg.getJson()));
+        byte[] msgBytes = jsonToBytes(msg.getJson());
+        byte[] encodedBytes = Encoder.encode(msgBytes);
+        byte[] packet = Packer.pack(encodedBytes);
+        physicalLayer.sendDataToNextStation(packet);
     }
 
     @Override
-    public void onPacketReceive(byte[] bytes) {
+    public void onPacketReceive(byte[] packet) {
         try {
-            Message msg = new Message(bytesToJSON(bytes));
+            byte[] encodedBytes = Packer.unpack(packet);
+            byte[] msgBytes = Decoder.decode(encodedBytes);
+            Message msg = new Message(bytesToJSON(msgBytes));
             if (msg.getDestinationId() == mId) {
                 // TODO: send message to user layer
                 System.out.println(msg.toString());
             } else {
                 // TODO: add TIMEOUT CHECKING
-                physicalLayer.sendDataToNextStation(bytes);
+                physicalLayer.sendDataToNextStation(packet);
             }
-        } catch (ParseException e) {
+        } catch (TransmissionFailedException | ParseException e) {
             // TODO: add exception handler
             e.printStackTrace();
         }
     }
 
     private byte[] jsonToBytes(JSONObject jsonObject) {
-        String msg = jsonObject.toString() + "\n";
-        return msg.getBytes();
+        return jsonObject.toString().getBytes();
     }
 
     private JSONObject bytesToJSON(byte[] bytes) throws ParseException {
-        String jsonString = new String(bytes);
-        jsonString = jsonString.substring(0, jsonString.length() - 1);
-        return (JSONObject) new JSONParser().parse(jsonString);
+        return (JSONObject) new JSONParser().parse(new String(bytes));
     }
 }
