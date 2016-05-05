@@ -45,7 +45,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     public void sendDataTo(int destinationId, String data) {
         Message msg = new Message(destinationId, mId, data);
-        physicalLayer.sendDataToNextStation(Encoder.encode(jsonToBytes(msg.getJson())));
+        physicalLayer.sendDataToNextStation(jsonToBytes(msg.getJson()));
     }
 
     @Override

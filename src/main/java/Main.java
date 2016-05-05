@@ -1,4 +1,5 @@
-import link.Encoder;
+import link.encoding.Decoder;
+import link.encoding.Encoder;
 import physical.PhysicalLayer;
 
 import java.util.HashMap;
@@ -10,7 +11,10 @@ public class Main {
     private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
 
     public static void main(String[] args) {
-        Encoder.encode("ABCD".getBytes());
+        byte[] msg = "ABCD".getBytes();
+        byte[] receivedMsg = Encoder.encode(msg);
+        byte[] decodedMsg = Decoder.decode(receivedMsg);
+        System.out.print(new String(decodedMsg));
 
 //        DataLinkLayer ws = new DataLinkLayer(0);
 //
