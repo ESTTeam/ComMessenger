@@ -6,7 +6,11 @@ import javax.comm.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TooManyListenersException;
+
+import static java.lang.Thread.sleep;
 
 public class PhysicalLayer {
     private final PortService portService;
@@ -60,9 +64,10 @@ public class PhysicalLayer {
         } catch (IOException | NullPointerException | TooManyListenersException e) {}
 
         inUse = true;
+        isCurrentStation = true;
     }
 
-    public synchronized void startAsIntermediate(SerialPort portForReceive) {
+    private synchronized void startAsIntermediate(SerialPort portForReceive) {
         portForSend = portService.openPort(portForSendName);
         try {
             outputStream = portForSend.getOutputStream();
@@ -111,16 +116,20 @@ public class PhysicalLayer {
     }
 
     public synchronized byte[] receiveDataFromPreviousStation() {
-        int offset = 0;
+        try {sleep(100);} catch (InterruptedException e) {}
+        List<Byte> symbolsList = new ArrayList<>();
         byte[] symbol = new byte[1];
         try {
-            byte[] message = new byte[portForReceive.getDataBits() + 45];
             while (symbol[0] != '\n') {
                 inputStream.read(symbol, 0, 1);
                 if (symbol[0] != 0) {
-                    message[offset++] = symbol[0];
+                    symbolsList.add(symbol[0]);
                 }
             }
+            byte[] message = new byte[symbolsList.size()];
+            int offset = 0;
+            for (byte b : symbolsList)
+                message[offset++] = b;
             return message;
         } catch (IOException e) {
             return null;
