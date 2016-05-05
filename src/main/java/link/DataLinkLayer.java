@@ -9,6 +9,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import physical.PhysicalLayer;
 import physical.PortService;
+import user.OnMessageReceiveListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +18,16 @@ import java.util.List;
 public class DataLinkLayer implements OnPacketReceiveListener {
 
     private int mId;
-    private PhysicalLayer physicalLayer;
+    private PhysicalLayer mPhysicalLayer;
+    private OnMessageReceiveListener mUserLayer;
 
     private List<PhysicalLayer> wsList;
 
     // TODO: add portNames
     // 0 <= id <= 4
-    public DataLinkLayer(int id) {
+    public DataLinkLayer(OnMessageReceiveListener userLayer, int id) {
         mId = id;
+        mUserLayer = userLayer;
 
         PortService portService = new PortService();
         wsList = new ArrayList<>(5);
@@ -42,9 +45,9 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             }
         }
 
-        physicalLayer = wsList.get(id);
-        physicalLayer.start();
-        physicalLayer.markAsCurrentStation();
+        mPhysicalLayer = wsList.get(id);
+        mPhysicalLayer.start();
+        mPhysicalLayer.markAsCurrentStation();
     }
 
     public void sendDataTo(int destinationId, String data) {
@@ -52,7 +55,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         byte[] msgBytes = jsonToBytes(msg.getJson());
         byte[] encodedBytes = Encoder.encode(msgBytes);
         byte[] packet = Packer.pack(encodedBytes);
-        physicalLayer.sendDataToNextStation(packet);
+        mPhysicalLayer.sendDataToNextStation(packet);
     }
 
     @Override
@@ -62,11 +65,11 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             byte[] msgBytes = Decoder.decode(encodedBytes);
             Message msg = new Message(bytesToJSON(msgBytes));
             if (msg.getDestinationId() == mId) {
-                // TODO: send message to user layer
+                mUserLayer.onMessageReceive(msg.getData());
                 System.out.println(msg.toString());
             } else {
                 // TODO: add TIMEOUT CHECKING
-                physicalLayer.sendDataToNextStation(packet);
+                mPhysicalLayer.sendDataToNextStation(packet);
             }
         } catch (TransmissionFailedException | ParseException e) {
             // TODO: add exception handler

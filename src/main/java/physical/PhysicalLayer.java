@@ -122,9 +122,9 @@ public class PhysicalLayer {
         try {
             while (symbol[0] != '\n') {
                 inputStream.read(symbol, 0, 1);
-                if (symbol[0] != 0) {
+//                if (symbol[0] != 0) {
                     symbolsList.add(symbol[0]);
-                }
+//                }
             }
             byte[] message = new byte[symbolsList.size()];
             int offset = 0;

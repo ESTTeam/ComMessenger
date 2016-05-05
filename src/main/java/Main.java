@@ -3,6 +3,7 @@ import link.encoding.Decoder;
 import link.encoding.Encoder;
 import link.encoding.TransmissionFailedException;
 import physical.PhysicalLayer;
+import user.OnMessageReceiveListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,7 @@ public class Main {
     private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
 
     public static void main(String[] args) {
-        DataLinkLayer ws = new DataLinkLayer(0);
+        DataLinkLayer ws = new DataLinkLayer(data -> {}, 0);
 
         ws.sendDataTo(0, "Data for 0 ws");
     }
