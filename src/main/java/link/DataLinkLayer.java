@@ -3,7 +3,9 @@ package link;
 import link.encoding.Decoder;
 import link.encoding.Encoder;
 import link.encoding.TransmissionFailedException;
+import link.packing.Frame;
 import link.packing.Packer;
+import link.packing.PacketWrongException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -25,8 +27,8 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     // TODO: add portNames
     // 0 <= id <= 4
-    public DataLinkLayer(OnMessageReceiveListener userLayer, int id) {
-        mId = id;
+    public DataLinkLayer(OnMessageReceiveListener userLayer, String userName, String portSender, String portReceiver) {
+        mId = Character.getNumericValue(portSender.charAt(3)) - 1;
         mUserLayer = userLayer;
 
         PortService portService = new PortService();
@@ -45,33 +47,41 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             }
         }
 
-        mPhysicalLayer = wsList.get(id);
+        PhysicalLayer ws = new PhysicalLayer(this, portService, "11", "12");
+        ws.nextStation = ws;
+
+        mPhysicalLayer = wsList.get(mId);
         mPhysicalLayer.start();
         mPhysicalLayer.markAsCurrentStation();
     }
 
     public void sendDataTo(int destinationId, String data) {
-        Message msg = new Message(destinationId, mId, data);
-        byte[] msgBytes = jsonToBytes(msg.getJson());
-        byte[] encodedBytes = Encoder.encode(msgBytes);
-        byte[] packet = Packer.pack(encodedBytes);
+        byte[] encodedDataBytes = Encoder.encode(data.getBytes());
+        Frame frame = new Frame((byte) mId, (byte) destinationId, Frame.FrameTypes.DATA, encodedDataBytes);
+        byte[] packet = Packer.pack(frame.getFrame());
         mPhysicalLayer.sendDataToNextStation(packet);
     }
 
     @Override
     public void onPacketReceive(byte[] packet) {
         try {
-            byte[] encodedBytes = Packer.unpack(packet);
-            byte[] msgBytes = Decoder.decode(encodedBytes);
-            Message msg = new Message(bytesToJSON(msgBytes));
-            if (msg.getDestinationId() == mId) {
-                mUserLayer.onMessageReceive(msg.getData());
-                System.out.println(msg.toString());
+            Frame frame = new Frame(Packer.unpack(packet));
+            if (frame.getDestination() == mId) {
+                byte[] data = Decoder.decode(frame.getData());
+                switch (frame.getFrameType()) {
+                    case DATA:
+                        mUserLayer.onMessageReceive(new String(data));
+                        System.out.println("RECEIVED: " + new String(data));
+                    case REGISTRATION:
+                        break;
+                    default:
+                        break;
+                }
             } else {
-                // TODO: add TIMEOUT CHECKING
                 mPhysicalLayer.sendDataToNextStation(packet);
             }
-        } catch (TransmissionFailedException | ParseException e) {
+
+        } catch (PacketWrongException | TransmissionFailedException e) {
             // TODO: add exception handler
             e.printStackTrace();
         }

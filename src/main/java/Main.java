@@ -14,9 +14,9 @@ public class Main {
     private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
 
     public static void main(String[] args) {
-        DataLinkLayer ws = new DataLinkLayer(data -> {}, 0);
+        DataLinkLayer ws = new DataLinkLayer(data -> {}, "User 1", "COM11", "COM12");
 
-        ws.sendDataTo(0, "Data for 0 ws");
+        ws.sendDataTo(4, "Data for 5 ws");
     }
 
     public static PhysicalLayer getNextStation(PhysicalLayer physicalLayer) {
