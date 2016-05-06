@@ -19,6 +19,7 @@ public class Frame {
 
     private static final byte START_BYTE = (byte) 0xFF;
     private static final byte STOP_BYTE = (byte) 0xFF;
+    public static final byte BROADCAST_BYTE = (byte) 0xFF;
     private static final int CONTROL_FIELD_COUNT = 6;
 
     private byte mSource;

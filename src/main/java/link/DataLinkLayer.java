@@ -20,19 +20,25 @@ import java.util.List;
 public class DataLinkLayer implements OnPacketReceiveListener {
 
     private int mId;
+    private String mUserName;
     private PhysicalLayer mPhysicalLayer;
     private OnMessageReceiveListener mUserLayer;
 
-    private List<PhysicalLayer> wsList;
+    private String[] wsNamesList;
 
     // TODO: add portNames
     // 0 <= id <= 4
     public DataLinkLayer(OnMessageReceiveListener userLayer, String userName, String portSender, String portReceiver) {
-        mId = Character.getNumericValue(portSender.charAt(3)) - 1;
         mUserLayer = userLayer;
+        mId = Character.getNumericValue(portSender.charAt(3)) - 1;
+        mUserName = userName;
 
+        wsListInitialization();
+    }
+
+    private void wsListInitialization() {
         PortService portService = new PortService();
-        wsList = new ArrayList<>(5);
+        List<PhysicalLayer> wsList = new ArrayList<>();
         wsList.add(new PhysicalLayer (this, portService, "COM11", "COM12"));
         wsList.add(new PhysicalLayer (this, portService, "COM21", "COM22"));
         wsList.add(new PhysicalLayer (this, portService, "COM31", "COM32"));
@@ -47,12 +53,15 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             }
         }
 
-        PhysicalLayer ws = new PhysicalLayer(this, portService, "11", "12");
-        ws.nextStation = ws;
-
         mPhysicalLayer = wsList.get(mId);
         mPhysicalLayer.start();
         mPhysicalLayer.markAsCurrentStation();
+
+        wsNamesList = new String[wsList.size()];
+        wsNamesList[mId] = mUserName;
+        sendRegistrationData(mUserName);
+
+        return;
     }
 
     public void sendDataTo(int destinationId, String data) {
@@ -62,36 +71,64 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         mPhysicalLayer.sendDataToNextStation(packet);
     }
 
+    private void sendRegistrationData(String name) {
+        byte[] encodedDataBytes = Encoder.encode(name.getBytes());
+        Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.REGISTRATION, encodedDataBytes);
+        byte[] packet = Packer.pack(frame.getFrame());
+        mPhysicalLayer.sendDataToNextStation(packet);
+    }
+
     @Override
     public void onPacketReceive(byte[] packet) {
+        Frame frame;
         try {
-            Frame frame = new Frame(Packer.unpack(packet));
-            if (frame.getDestination() == mId) {
-                byte[] data = Decoder.decode(frame.getData());
-                switch (frame.getFrameType()) {
-                    case DATA:
-                        mUserLayer.onMessageReceive(new String(data));
-                        System.out.println("RECEIVED: " + new String(data));
-                    case REGISTRATION:
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                mPhysicalLayer.sendDataToNextStation(packet);
-            }
+            frame = new Frame(Packer.unpack(packet));
 
-        } catch (PacketWrongException | TransmissionFailedException e) {
+            switch (frame.getFrameType()) {
+                case DATA:
+                    onDataPacketReceived(packet, frame);
+                    break;
+                case REGISTRATION:
+                    onRegistrationPacketReceived(packet, frame);
+                    break;
+                default:
+                    break;
+            }
+        } catch (PacketWrongException e) {
             // TODO: add exception handler
             e.printStackTrace();
         }
     }
 
-    private byte[] jsonToBytes(JSONObject jsonObject) {
-        return jsonObject.toString().getBytes();
+    private void onDataPacketReceived(byte[] packet, Frame frame) {
+        if (frame.getDestination() == mId) {
+            try {
+                byte[] data = Decoder.decode(frame.getData());
+
+                mUserLayer.onMessageReceive(new String(data));
+                System.out.println("RECEIVED: " + new String(data));
+            } catch (TransmissionFailedException e) {
+                // TODO: add exception handler
+                e.printStackTrace();
+            }
+        } else {
+            // TODO: add TIMEOUT
+            mPhysicalLayer.sendDataToNextStation(packet);
+        }
     }
 
-    private JSONObject bytesToJSON(byte[] bytes) throws ParseException {
-        return (JSONObject) new JSONParser().parse(new String(bytes));
+    private void onRegistrationPacketReceived(byte[] packet, Frame frame) {
+        if (frame.getSource() != mId) {
+            try {
+                byte[] data = Decoder.decode(frame.getData());
+
+                wsNamesList[frame.getSource()] = new String(data);
+                mPhysicalLayer.sendDataToNextStation(packet);
+                // TODO: send response
+            } catch (TransmissionFailedException e) {
+                // TODO: add exception handler
+                e.printStackTrace();
+            }
+        }
     }
 }
