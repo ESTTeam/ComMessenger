@@ -64,7 +64,7 @@ public class PhysicalLayer {
         } catch (IOException | NullPointerException | TooManyListenersException e) {}
 
         inUse = true;
-        isCurrentStation = true;
+        markAsCurrentStation();
     }
 
     private synchronized void startAsIntermediate(SerialPort portForReceive) {
@@ -142,7 +142,7 @@ public class PhysicalLayer {
 
     public void markAsInUse() { inUse = true; }
 
-    public void markAsCurrentStation() { isCurrentStation = true; }
+    private void markAsCurrentStation() { isCurrentStation = true; }
 
     public InputStream getInputStream() { return inputStream; }
 }
