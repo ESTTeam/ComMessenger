@@ -4,6 +4,7 @@ import link.encoding.Encoder;
 import link.encoding.TransmissionFailedException;
 import physical.PhysicalLayer;
 import user.OnMessageReceiveListener;
+import user.UserLayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +12,15 @@ import java.util.Map;
 import static java.lang.Thread.sleep;
 
 public class Main {
-    private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
 
     public static void main(String[] args) {
+
+        UserLayer userLayer = new UserLayer();
+        userLayer.main(args);
+    }
+   // private static Map<PhysicalLayer, PhysicalLayer> nextWorkStation = new HashMap<>();
+
+   /* public static void main(String[] args) {
         DataLinkLayer ws = new DataLinkLayer(data -> {}, "User 1", "COM11", "COM12");
 
         ws.sendDataTo(4, "Data for 5 ws");
@@ -46,5 +53,5 @@ public class Main {
             System.out.println("Ошибка при передаче");
         }
         System.out.print(new String(decodedMsg));
-    }
+    }*/
 }

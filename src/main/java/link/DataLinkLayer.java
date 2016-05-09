@@ -31,6 +31,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         mId = Character.getNumericValue(portSender.charAt(3)) - 1;
         mUserLayer = userLayer;
 
+
         PortService portService = new PortService();
         wsList = new ArrayList<>(5);
         wsList.add(new PhysicalLayer (this, portService, "COM11", "COM12"));
