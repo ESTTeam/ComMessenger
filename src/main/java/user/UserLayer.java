@@ -9,7 +9,7 @@ public class UserLayer implements OnMessageReceiveListener {
 
     @Override
     public void onUserAdd(String userName) {
-        
+
     }
 
     @Override
@@ -21,7 +21,6 @@ public class UserLayer implements OnMessageReceiveListener {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                  UserFormSettings userFormSettings = new UserFormSettings();
-                // UserChatWindow userChatWindow = new UserChatWindow();
             }
         });
 

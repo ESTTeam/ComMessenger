@@ -1,10 +1,13 @@
 package user;
 
-import sun.net.www.content.image.jpeg;
+import link.DataLinkLayer;
+import physical.PhysicalLayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by Igor on 09.05.16.
@@ -18,7 +21,7 @@ public class UserChatWindow extends JFrame{
 
     JButton disconnectButton;
 
-    JLabel connectStatycLabel;
+    JLabel connectionStatusLabel;
 
     JLabel spaceLabel;
     Border border = BorderFactory.createLineBorder(Color.BLACK);
@@ -29,9 +32,13 @@ public class UserChatWindow extends JFrame{
         usersWindow = new JTextArea(25, 10);
         messageWindow = new JTextField();
         disconnectButton = new JButton("Раздъединить");
-        connectStatycLabel = new JLabel("Подключено");
+        ActionListener disconnectActionListener = new DisconnectActionListener();
+        disconnectButton.addActionListener(disconnectActionListener);
+        connectionStatusLabel = new JLabel("Подключено");
         JButton historyButton = new JButton("История");
         JButton sendButton = new JButton("Послать");
+        ActionListener sendMessageActionListener = new SendMessageActionListener();
+        sendButton.addActionListener(sendMessageActionListener);
         JButton exitButton = new JButton("Выход");
 
 
@@ -42,7 +49,7 @@ public class UserChatWindow extends JFrame{
         jPanel.add(usersWindow);
         jPanel.add(messageWindow);
         jPanel.add(disconnectButton);
-        jPanel.add(connectStatycLabel);
+        jPanel.add(connectionStatusLabel);
         jPanel.add(new JLabel("                       " +
                 "                             " +
                 "              " +
@@ -59,4 +66,15 @@ public class UserChatWindow extends JFrame{
         setLocationRelativeTo(null);
         setVisible(true);
     }
+    public class DisconnectActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            DataLinkLayer.disconnect();
+        }
+    }
+    public class SendMessageActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+
+        }
+    }
+
 }
