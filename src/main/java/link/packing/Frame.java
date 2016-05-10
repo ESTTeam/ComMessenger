@@ -5,7 +5,8 @@ public class Frame {
     public enum FrameTypes {
         DATA,
         REGISTRATION,
-        REGISTRATION_RESPONSE
+        REGISTRATION_RESPONSE,
+        DISCONNECT
     }
 
     private enum ControlFields {

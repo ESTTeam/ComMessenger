@@ -10,6 +10,11 @@ public class Main {
 
         @Override
         public void onUserAdd(String userName) {}
+
+        @Override
+        public void onUserDelete(String userName) {
+
+        }
     };
 
     public static void main(String[] args) {

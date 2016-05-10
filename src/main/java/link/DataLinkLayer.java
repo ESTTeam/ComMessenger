@@ -59,7 +59,19 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void disconnect() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending Disconnect from " + (mId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
+        byte[] encodedDataBytes = Encoder.encode(mUserName.getBytes());
+        Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.DISCONNECT, encodedDataBytes);
+        byte[] packet = Packer.pack(frame.getFrame());
+        mPhysicalLayer.sendDataToNextStation(packet);
+
+        // TODO: uncomment
+//        mPhysicalLayer.stop()
     }
 
     public List<String> getUsers() {
@@ -122,6 +134,9 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                     break;
                 case REGISTRATION_RESPONSE:
                     onRegistrationResponsePacketReceived(packet, frame);
+                    break;
+                case DISCONNECT:
+                    onDisconnectPacketReceived(packet, frame);
                     break;
                 default:
                     break;
@@ -206,6 +221,27 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 e.printStackTrace();
             }
             mPhysicalLayer.sendDataToNextStation(packet);
+        }
+    }
+
+    private synchronized void onDisconnectPacketReceived(byte[] packet, Frame frame) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Received Disconnect from " + (frame.getSource() + 1) + " on " + (mId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+        if (frame.getSource() != mId) {
+            try {
+                String userName = new String(Decoder.decode(frame.getData()));
+
+                mWsNamesList.remove(userName);
+                mUserLayer.onUserDelete(userName);
+                mPhysicalLayer.sendDataToNextStation(packet);
+            } catch (TransmissionFailedException e) {
+                // TODO: add exception handler
+                e.printStackTrace();
+            }
         }
     }
 }
