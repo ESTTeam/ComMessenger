@@ -59,7 +59,14 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void sendDataTo(String destinationUser, String data) {
+        // TODO: check existing
         byte destinationId = (byte) mWsNamesList.get(destinationUser).intValue();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending Data from " + (mId + 1) + " to " + (destinationId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
         byte[] encodedDataBytes = Encoder.encode(data.getBytes());
         Frame frame = new Frame((byte) mId, destinationId, Frame.FrameTypes.DATA, encodedDataBytes);
@@ -123,7 +130,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 byte[] data = Decoder.decode(frame.getData());
 
                 mUserLayer.onMessageReceive(new String(data));
-                System.out.println("RECEIVED: " + new String(data) + " from " + frame.getSource() + 1);
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(System.currentTimeMillis());
+                System.out.println("RECEIVED: " + new String(data) + " from " + (frame.getSource() + 1));
+                System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                        + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
             } catch (TransmissionFailedException e) {
                 // TODO: add exception handler
                 e.printStackTrace();
