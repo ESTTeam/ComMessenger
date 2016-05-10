@@ -58,6 +58,14 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         sendRegistrationData(mUserName);
     }
 
+    public void disconnect() {
+
+    }
+
+    public List<String> getUsers() {
+        return new ArrayList<>(mWsNamesList.keySet());
+    }
+
     public void sendDataTo(String destinationUser, String data) {
         // TODO: check existing
         byte destinationId = (byte) mWsNamesList.get(destinationUser).intValue();
@@ -155,9 +163,10 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
         if (frame.getSource() != mId) {
             try {
-                byte[] data = Decoder.decode(frame.getData());
+                String userName = new String(Decoder.decode(frame.getData()));
 
-                mWsNamesList.put(new String(data), (int) frame.getSource());
+                mWsNamesList.put(userName, (int) frame.getSource());
+                mUserLayer.onUserAdd(userName);
                 mPhysicalLayer.sendDataToNextStation(packet);
 
                 try {
