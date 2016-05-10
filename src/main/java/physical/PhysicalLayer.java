@@ -65,6 +65,21 @@ public class PhysicalLayer {
         markAsCurrentStation();
     }
 
+    public synchronized void stop() {
+        portForSend.removeEventListener();
+        portService.closePort(portForSend);
+        portForSend = null;
+        outputStream = null;
+
+        portForReceive.removeEventListener();
+        portService.closePort(portForReceive);
+        portForReceive = null;
+        inputStream = null;
+
+        inUse =  false;
+        isCurrentStation = false;
+    }
+
     private synchronized void startAsIntermediate(SerialPort portForReceive) {
         portForSend = portService.openPort(portForSendName);
         try {
