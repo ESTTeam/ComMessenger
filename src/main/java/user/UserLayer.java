@@ -7,6 +7,16 @@ public class UserLayer implements OnMessageReceiveListener {
         // TODO
     }
 
+    @Override
+    public void onUserAdd(String userName) {
+        
+    }
+
+    @Override
+    public void onUserDelete(String userName) {
+
+    }
+
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
