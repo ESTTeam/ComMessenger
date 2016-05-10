@@ -56,34 +56,46 @@ public class UserFormSettings extends JFrame {
         };
         comPortBox = new JComboBox(comPortList);
         comPortBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXX");
-
+        JPanel jPanelComPortBox = new JPanel();
+        jPanelComPortBox.add(comPortBox);
+        jPanelComPortBox.setPreferredSize(new Dimension(220, 20));
         String[] comSpeedList = {
                 "300", "600", "1200", "2400", "4800", "9600", "14400", "28800", "36000", "57600", "115000"
         };
         JComboBox comSpeedBox = new JComboBox(comSpeedList);
-        comSpeedBox.setMaximumSize(new Dimension(10, 5));
-        comSpeedBox.setMaximumRowCount(11);
+        comSpeedBox.setPreferredSize(new Dimension(230, 25));
+        JPanel jPanelComSpeedBox = new JPanel();
+        jPanelComSpeedBox.add(comSpeedBox);
+
+
         comSpeedBox.setPrototypeDisplayValue("XXXXXXXXXXXXXX");
+
 
         String[] comBitsList = {
                 "5", "6", "7", "8"
         };
         JComboBox comBitsBox = new JComboBox(comBitsList);
         comBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXX");
-
+        comBitsBox.setPreferredSize(new Dimension(230, 25));
+        JPanel jPanelComBitsBox = new JPanel();
+        jPanelComBitsBox.add(comBitsBox);
 
         String[] comStopBitsList = {
                 "1", "2", "1.5"
         };
         JComboBox comStopBitsBox = new JComboBox(comStopBitsList);
         comStopBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXX");
-
+        comStopBitsBox.setPreferredSize(new Dimension(230, 25));
+        JPanel jPanelComStopBitsBox = new JPanel();
+        jPanelComStopBitsBox.add(comStopBitsBox);
         String[] comParityBitsList = {
                 "none", "odd", "even", "mark", "space"
         };
         JComboBox comParityBitsBox = new JComboBox(comParityBitsList);
         comParityBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
-
+        comParityBitsBox.setPreferredSize(new Dimension(230, 25));
+        JPanel jPanelComParityBitsBox = new JPanel();
+        jPanelComParityBitsBox.add(comParityBitsBox);
         JLabel comSpeed2 = new JLabel("Скорость");
         JLabel comBits2 = new JLabel("Биты данных");
         JLabel comStopBits2 = new JLabel("Стопы биты");
@@ -118,20 +130,23 @@ public class UserFormSettings extends JFrame {
         JComboBox comParityBitsBox2 = new JComboBox(comParityBitsList2);
         comParityBitsBox2.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
         tabbedPane.setMaximumSize(new Dimension(400, 400));
+        JPanel jPanelButtonRegister= new JPanel();
+        jPanelButtonRegister.add(button);
+        jPanelButtonRegister.setMaximumSize(new Dimension(getWidth(), 15));
         setComPort1.setLayout(new GridLayout(5, 2, 1, 1));
         setNickName.add(comPort);
-        setNickName.add(comPortBox);
-        setNickName.add(button);
+        setNickName.add(jPanelComPortBox);
+        setNickName.add(jPanelButtonRegister);
         setComPort1.add(comSelectedPortTitleIn);
         setComPort1.add(comSelectedPortIn);
         setComPort1.add(comSpeed);
-        setComPort1.add(comSpeedBox);
+        setComPort1.add(jPanelComSpeedBox);
         setComPort1.add(comBits);
-        setComPort1.add(comBitsBox);
+        setComPort1.add(jPanelComBitsBox);
         setComPort1.add(comStopBits);
-        setComPort1.add(comStopBitsBox);
+        setComPort1.add(jPanelComStopBitsBox);
         setComPort1.add(comParityBit);
-        setComPort1.add(comParityBitsBox);
+        setComPort1.add(jPanelComParityBitsBox);
 
 
         setComPort2.setLayout(new GridLayout(5, 2, 1, 1));
@@ -176,8 +191,8 @@ public class UserFormSettings extends JFrame {
         public void actionPerformed(ActionEvent e) {
             DataLinkLayer dataLinkLayer = new DataLinkLayer(new UserLayer() , getUserNameFromRegister(),
             getComPortSender(), getComPortReceiver());
-            UserChatWindow userChatWindow = new UserChatWindow();
             dispose();
+            UserChatWindow userChatWindow = new UserChatWindow();
             userChatWindow.setVisible(true);
         }
     }
