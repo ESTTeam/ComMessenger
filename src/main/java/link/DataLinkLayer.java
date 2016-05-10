@@ -70,8 +70,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         byte[] packet = Packer.pack(frame.getFrame());
         mPhysicalLayer.sendDataToNextStation(packet);
 
-        // TODO: uncomment
-//        mPhysicalLayer.stop()
+        mPhysicalLayer.stop();
     }
 
     public List<String> getUsers() {
