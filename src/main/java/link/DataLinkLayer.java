@@ -10,14 +10,13 @@ import physical.PhysicalLayer;
 import physical.PortService;
 import user.OnMessageReceiveListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 
 public class DataLinkLayer implements OnPacketReceiveListener {
+
+    private static final int SENDING_TIMEOUT = 250;
 
     private int mId;
     private String mUserName;
@@ -69,6 +68,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void sendRegistrationData(String name) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending Registration from " + (mId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
         byte[] encodedDataBytes = Encoder.encode(name.getBytes());
         Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.REGISTRATION, encodedDataBytes);
         byte[] packet = Packer.pack(frame.getFrame());
@@ -76,6 +81,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void sendRegistrationResponseData(byte destinationId, String name) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending RegistrationResponse from " + (mId + 1) + " to " + (destinationId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
         byte[] encodedDataBytes = Encoder.encode(name.getBytes());
         Frame frame = new Frame((byte) mId, destinationId, Frame.FrameTypes.REGISTRATION_RESPONSE, encodedDataBytes);
         byte[] packet = Packer.pack(frame.getFrame());
@@ -112,7 +123,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 byte[] data = Decoder.decode(frame.getData());
 
                 mUserLayer.onMessageReceive(new String(data));
-                System.out.println("RECEIVED: " + new String(data));
+                System.out.println("RECEIVED: " + new String(data) + " from " + frame.getSource() + 1);
             } catch (TransmissionFailedException e) {
                 // TODO: add exception handler
                 e.printStackTrace();
@@ -124,6 +135,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void onRegistrationPacketReceived(byte[] packet, Frame frame) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Received Registration from " + (frame.getSource() + 1) + " on " + (mId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
         if (frame.getSource() != mId) {
             try {
                 byte[] data = Decoder.decode(frame.getData());
@@ -132,7 +149,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 mPhysicalLayer.sendDataToNextStation(packet);
 
                 try {
-                    sleep(2500);
+                    sleep(SENDING_TIMEOUT);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -147,6 +164,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     private synchronized void onRegistrationResponsePacketReceived(byte[] packet, Frame frame) {
         if (frame.getDestination() == mId) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            System.out.println("Received RegistrationResponse from " + (frame.getSource() + 1) + " on " + (mId + 1));
+            System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                    + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
             try {
                 byte[] data = Decoder.decode(frame.getData());
 
@@ -156,6 +179,11 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 e.printStackTrace();
             }
         } else {
+            try {
+                sleep(SENDING_TIMEOUT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             mPhysicalLayer.sendDataToNextStation(packet);
         }
     }

@@ -5,31 +5,27 @@ import java.util.Enumeration;
 
 public class PortService {
 
-    private static final int TIMEOUT = 2000;
+    private static final int TIMEOUT = 200;
 
-    public SerialPort openPort(String portName) {
+    SerialPort openPort(String portName) {
         CommPortIdentifier portId = searchPort(portName);
         if (portId == null) {
             System.out.println("Port " + portName + " not found!");
             return null;
         }
         try {
-            SerialPort serialPort = (SerialPort) portId.open(portName, TIMEOUT);
-            System.out.println("Port " + serialPort.getName() + " opened!");
-            return serialPort;
+            return (SerialPort) portId.open(portName, TIMEOUT);
         } catch (PortInUseException e) {
-            System.out.println("Port " + portName + " already opened!");
             return null;
         }
     }
 
-    public void closePort(SerialPort port) {
+    void closePort(SerialPort port) {
         if (port != null)
             port.close();
-        System.out.println("Port " + port.getName() + " closed!");
     }
 
-    public void setPortParameters(SerialPort port, int baudRate, int dataBits, int stopBits, int parity) {
+    void setPortParameters(SerialPort port, int baudRate, int dataBits, int stopBits, int parity) {
         try {
             port.setSerialPortParams(baudRate, dataBits, stopBits, parity);
             System.out.append(port.getName()).append(" parameters changed: ");

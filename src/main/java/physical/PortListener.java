@@ -6,11 +6,11 @@ import javax.comm.SerialPortEvent;
 import javax.comm.SerialPortEventListener;
 import java.io.IOException;
 
-public class PortListener implements SerialPortEventListener {
-    PhysicalLayer physicalLayer;
-    OnPacketReceiveListener dataLinkLayer;
+class PortListener implements SerialPortEventListener {
+    private PhysicalLayer physicalLayer;
+    private OnPacketReceiveListener dataLinkLayer;
 
-    public PortListener(PhysicalLayer physicalLayer, OnPacketReceiveListener dataLinkLayer)
+    PortListener(PhysicalLayer physicalLayer, OnPacketReceiveListener dataLinkLayer)
     {
         this.physicalLayer = physicalLayer;
         this.dataLinkLayer = dataLinkLayer;
@@ -29,18 +29,15 @@ public class PortListener implements SerialPortEventListener {
             case SerialPortEvent.RI:
                 break;
             case SerialPortEvent.DATA_AVAILABLE:
-                System.out.println("data available for " + physicalLayer.getPortForReceive().getName());
                 if (!physicalLayer.inUse()) {
                     byte[] receivedMessage = physicalLayer.receiveDataFromPreviousStation();
                     try { physicalLayer.getInputStream().reset(); } catch (IOException e) {}
-                    System.out.println(new String(receivedMessage));
                     physicalLayer.sendDataToNextStation(receivedMessage);
                     physicalLayer.closePortForReceive();
                     physicalLayer.closePortForSend();
                 } else if (physicalLayer.isCurrentStation()){
                     byte[] receivedMessage = physicalLayer.receiveDataFromPreviousStation();
                     dataLinkLayer.onPacketReceive(receivedMessage);
-                    System.out.println(new String(receivedMessage));
                 }
                 break;
         }

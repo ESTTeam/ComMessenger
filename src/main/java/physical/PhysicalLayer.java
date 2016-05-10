@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TooManyListenersException;
 
-import static java.lang.Thread.sleep;
-
 public class PhysicalLayer {
     private final PortService portService;
 
@@ -89,18 +87,17 @@ public class PhysicalLayer {
         portService.setPortParameters(portForReceive, baudRate, dataBits, stopBits, parity);
     }
 
-    public synchronized void closePortForSend() { portService.closePort(portForSend); }
+    synchronized void closePortForSend() { portService.closePort(portForSend); }
 
-    public synchronized void closePortForReceive() { portService.closePort(portForReceive); }
+    synchronized void closePortForReceive() { portService.closePort(portForReceive); }
 
     public SerialPort getPortForSend() { return portForSend; }
 
     public SerialPort getPortForReceive() { return portForReceive; }
 
-    public String getPortForReceiveName() { return portForReceiveName; }
+    private String getPortForReceiveName() { return portForReceiveName; }
 
     public synchronized void sendDataToNextStation(byte[] data) {
-        System.out.println("sending data");
         SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
         if (nextStationPortForReceive != null)
             nextStation.startAsIntermediate(nextStationPortForReceive);
@@ -115,13 +112,13 @@ public class PhysicalLayer {
         }
     }
 
-    public synchronized byte[] receiveDataFromPreviousStation() {
-        try {sleep(100);} catch (InterruptedException e) {}
+    synchronized byte[] receiveDataFromPreviousStation() {
         List<Byte> symbolsList = new ArrayList<>();
         byte[] symbol = new byte[1];
         try {
             while (symbol[0] != '\n') {
                 inputStream.read(symbol, 0, 1);
+//              TODO: check needless
 //                if (symbol[0] != 0) {
                     symbolsList.add(symbol[0]);
 //                }
@@ -136,13 +133,13 @@ public class PhysicalLayer {
         }
     }
 
-    public boolean inUse() { return inUse; }
+    boolean inUse() { return inUse; }
 
-    public boolean isCurrentStation() { return isCurrentStation; }
+    boolean isCurrentStation() { return isCurrentStation; }
 
-    public void markAsInUse() { inUse = true; }
+    private void markAsInUse() { inUse = true; }
 
     private void markAsCurrentStation() { isCurrentStation = true; }
 
-    public InputStream getInputStream() { return inputStream; }
+    InputStream getInputStream() { return inputStream; }
 }
