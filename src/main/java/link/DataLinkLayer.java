@@ -206,9 +206,10 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                     + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
             try {
-                byte[] data = Decoder.decode(frame.getData());
+                String userName = new String(Decoder.decode(frame.getData()));
 
-                mWsNamesList.put(new String(data), (int) frame.getSource());
+                mWsNamesList.put(userName, (int) frame.getSource());
+                mUserLayer.onUserAdd(userName);
             } catch (TransmissionFailedException e) {
                 // TODO: add exception handler
                 e.printStackTrace();
