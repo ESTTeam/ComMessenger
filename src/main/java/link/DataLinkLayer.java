@@ -80,6 +80,14 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         return new ArrayList<>(mWsNamesList.keySet());
     }
 
+    public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+    }
+
+    public void setReceivePortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+    }
+
     public void sendDataTo(String destinationUser, String data) throws NoSuchUserException {
         byte destinationId;
         try {
