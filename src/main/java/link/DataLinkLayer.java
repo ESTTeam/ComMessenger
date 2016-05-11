@@ -27,7 +27,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     private String mLastSentDestination = null;
     private String mLastSentData = null;
-
+                //ToDO CheckUseExistence
     public DataLinkLayer(OnMessageReceiveListener userLayer, String userName, String portSender, String portReceiver) {
         mUserLayer = userLayer;
         mId = Character.getNumericValue(portSender.charAt(3)) - 1;
@@ -276,7 +276,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         System.out.println("Received Disconnect from " + (frame.getSource() + 1) + " on " + (mId + 1));
         System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
                 + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
-
+        //// TODO:  AddTimeout
         if (frame.getSource() != mId) {
             try {
                 String userName = new String(Decoder.decode(frame.getData()));

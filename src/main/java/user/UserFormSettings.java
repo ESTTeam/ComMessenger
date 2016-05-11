@@ -189,8 +189,8 @@ public class UserFormSettings extends JFrame {
     }
     public class TestActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            DataLinkLayer dataLinkLayer = new DataLinkLayer(new MessageToStation(), getUserNameFromRegister(),
-            getComPortSender(), getComPortReceiver());
+            UserChatWindow userChatWindow = new UserChatWindow(getUserNameFromRegister(),
+                    getComPortSender(), getComPortReceiver());
             dispose();
         }
     }

@@ -4,9 +4,9 @@ package user;
  * Created by Igor on 11.05.16.
  */
 public class MessageToStation implements OnMessageReceiveListener {
-    UserChatWindow userChatWindow;
-    public MessageToStation () {
-        userChatWindow = new UserChatWindow();
+    public UserChatWindow userChatWindow;
+    public MessageToStation (UserChatWindow userChatWindow) {
+        this.userChatWindow = userChatWindow;
     }
     @Override
     public void onMessageReceive(String data) {
@@ -15,12 +15,13 @@ public class MessageToStation implements OnMessageReceiveListener {
 
     @Override
     public void onUserAdd(String userName) {
-        userChatWindow.usersWindow.append(userName + "\n");
+        userChatWindow.model.addElement(userName);
     }
 
     @Override
     public void onUserDelete(String userName) {
-        //TODO
+        int indexRemovingUser = userChatWindow.model.indexOf(userName);
+        userChatWindow.model.remove(indexRemovingUser);
     }
 
 }
