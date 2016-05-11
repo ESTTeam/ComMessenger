@@ -6,7 +6,9 @@ public class Frame {
         DATA,
         REGISTRATION,
         REGISTRATION_RESPONSE,
-        DISCONNECT
+        DISCONNECT,
+        ACKNOWLEDGMENT,
+        REPETITION
     }
 
     private enum ControlFields {

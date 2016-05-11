@@ -18,12 +18,15 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     private static final int SENDING_TIMEOUT = 250;
 
-    private int mId;
-    private String mUserName;
+    private final int mId;
+    private final String mUserName;
     private PhysicalLayer mPhysicalLayer;
-    private OnMessageReceiveListener mUserLayer;
+    private final OnMessageReceiveListener mUserLayer;
 
     private Map<String, Integer> mWsNamesList;
+
+    private String mLastSentDestination = null;
+    private String mLastSentData = null;
 
     public DataLinkLayer(OnMessageReceiveListener userLayer, String userName, String portSender, String portReceiver) {
         mUserLayer = userLayer;
@@ -77,9 +80,21 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         return new ArrayList<>(mWsNamesList.keySet());
     }
 
-    public void sendDataTo(String destinationUser, String data) {
-        // TODO: check existing
-        byte destinationId = (byte) mWsNamesList.get(destinationUser).intValue();
+    public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+    }
+
+    public void setReceivePortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+    }
+
+    public void sendDataTo(String destinationUser, String data) throws NoSuchUserException {
+        byte destinationId;
+        try {
+            destinationId = (byte) mWsNamesList.get(destinationUser).intValue();
+        } catch (NullPointerException e) {
+            throw new NoSuchUserException();
+        }
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -91,6 +106,9 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         Frame frame = new Frame((byte) mId, destinationId, Frame.FrameTypes.DATA, encodedDataBytes);
         byte[] packet = Packer.pack(frame.getFrame());
         mPhysicalLayer.sendDataToNextStation(packet);
+
+        mLastSentData = data;
+        mLastSentDestination = destinationUser;
     }
 
     private void sendRegistrationData(String name) {
@@ -119,6 +137,30 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         mPhysicalLayer.sendDataToNextStation(packet);
     }
 
+    private void sendAcknowledgementPacket(byte destinationId) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending Acknowledgement from " + (mId + 1) + " to " + (destinationId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+        Frame frame = new Frame((byte) mId, destinationId, Frame.FrameTypes.ACKNOWLEDGMENT, new byte[0]);
+        byte[] packet = Packer.pack(frame.getFrame());
+        mPhysicalLayer.sendDataToNextStation(packet);
+    }
+
+    private void sendRepetitionPacket(byte destinationId) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending Repetition from " + (mId + 1) + " to " + (destinationId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+        Frame frame = new Frame((byte) mId, destinationId, Frame.FrameTypes.REPETITION, new byte[0]);
+        byte[] packet = Packer.pack(frame.getFrame());
+        mPhysicalLayer.sendDataToNextStation(packet);
+    }
+
     @Override
     public void onPacketReceive(byte[] packet) {
         try {
@@ -137,11 +179,16 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 case DISCONNECT:
                     onDisconnectPacketReceived(packet, frame);
                     break;
+                case ACKNOWLEDGMENT:
+                    onAcknowledgementPacketReceived(packet, frame);
+                    break;
+                case REPETITION:
+                    onRepetitionPacketReceived(packet, frame);
+                    break;
                 default:
                     break;
             }
         } catch (PacketWrongException e) {
-            // TODO: add exception handler
             e.printStackTrace();
         }
     }
@@ -158,12 +205,13 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 System.out.println("RECEIVED: " + new String(data) + " from " + (frame.getSource() + 1));
                 System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
                         + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+                sendAcknowledgementPacket(frame.getSource());
             } catch (TransmissionFailedException e) {
-                // TODO: add exception handler
+                sendRepetitionPacket(frame.getSource());
                 e.printStackTrace();
             }
         } else {
-            // TODO: add TIMEOUT
             mPhysicalLayer.sendDataToNextStation(packet);
         }
     }
@@ -191,13 +239,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
                 sendRegistrationResponseData(frame.getSource(), mUserName);
             } catch (TransmissionFailedException e) {
-                // TODO: add exception handler
                 e.printStackTrace();
             }
         }
     }
 
-    private synchronized void onRegistrationResponsePacketReceived(byte[] packet, Frame frame) {
+    private void onRegistrationResponsePacketReceived(byte[] packet, Frame frame) {
         if (frame.getDestination() == mId) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
@@ -206,12 +253,11 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                     + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
             try {
-                String data = new String(Decoder.decode(frame.getData()));
+                String userName = new String(Decoder.decode(frame.getData()));
 
-                mWsNamesList.put(data, (int) frame.getSource());
-                mUserLayer.onUserAdd(data);
+                mWsNamesList.put(userName, (int) frame.getSource());
+                mUserLayer.onUserAdd(userName);
             } catch (TransmissionFailedException e) {
-                // TODO: add exception handler
                 e.printStackTrace();
             }
         } else {
@@ -224,7 +270,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         }
     }
 
-    private synchronized void onDisconnectPacketReceived(byte[] packet, Frame frame) {
+    private void onDisconnectPacketReceived(byte[] packet, Frame frame) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         System.out.println("Received Disconnect from " + (frame.getSource() + 1) + " on " + (mId + 1));
@@ -239,9 +285,54 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 mUserLayer.onUserDelete(userName);
                 mPhysicalLayer.sendDataToNextStation(packet);
             } catch (TransmissionFailedException e) {
-                // TODO: add exception handler
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void onAcknowledgementPacketReceived(byte[] packet, Frame frame) {
+        if (frame.getDestination() == mId) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            System.out.println("Received Acknowledgement from " + (frame.getSource() + 1) + " on " + (mId + 1));
+            System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                    + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+            mLastSentData = null;
+            mLastSentDestination = null;
+        } else {
+            try {
+                sleep(SENDING_TIMEOUT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            mPhysicalLayer.sendDataToNextStation(packet);
+        }
+    }
+
+    private void onRepetitionPacketReceived(byte[] packet, Frame frame) {
+        if (frame.getDestination() == mId) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            System.out.println("Received Repetition from " + (frame.getSource() + 1) + " on " + (mId + 1));
+            System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                    + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+            if (mLastSentDestination != null) {
+                try {
+                    sendDataTo(mLastSentDestination, mLastSentData);
+                } catch (NoSuchUserException e) {
+                    mLastSentDestination = null;
+                    mLastSentData = null;
+                }
+            }
+        } else {
+            try {
+                sleep(SENDING_TIMEOUT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            mPhysicalLayer.sendDataToNextStation(packet);
         }
     }
 }
