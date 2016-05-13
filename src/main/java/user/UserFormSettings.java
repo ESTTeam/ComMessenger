@@ -7,7 +7,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import javax.comm.SerialPort;
 import javax.swing.*;
+
+import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int;
 
 public class UserFormSettings extends JFrame {
 
@@ -19,6 +22,21 @@ public class UserFormSettings extends JFrame {
 
     JTextField userName;
 
+    JComboBox comSpeedBox;
+
+    JComboBox comBitsBox;
+
+    JComboBox comStopBitsBox;
+
+    JComboBox comParityBitsBox;
+
+    JComboBox comSpeedBox2;
+
+    JComboBox comBitsBox2;
+
+    JComboBox comStopBitsBox2;
+
+    JComboBox comParityBitsBox2;
     public UserFormSettings() {
 
         super("Настройка подключения");
@@ -59,10 +77,10 @@ public class UserFormSettings extends JFrame {
         JPanel jPanelComPortBox = new JPanel();
         jPanelComPortBox.add(comPortBox);
         jPanelComPortBox.setPreferredSize(new Dimension(220, 20));
-        String[] comSpeedList = {
-                "300", "600", "1200", "2400", "4800", "9600", "14400", "28800", "36000", "57600", "115000"
+        Integer[] comSpeedList = {
+                300, 600, 1200, 2400, 4800, 9600, 14400, 28800, 36000, 57600, 115000
         };
-        JComboBox comSpeedBox = new JComboBox(comSpeedList);
+        comSpeedBox = new JComboBox(comSpeedList);
         comSpeedBox.setPreferredSize(new Dimension(230, 25));
         JPanel jPanelComSpeedBox = new JPanel();
         jPanelComSpeedBox.add(comSpeedBox);
@@ -71,27 +89,27 @@ public class UserFormSettings extends JFrame {
         comSpeedBox.setPrototypeDisplayValue("XXXXXXXXXXXXXX");
 
 
-        String[] comBitsList = {
-                "5", "6", "7", "8"
+        Integer[] comBitsList = {
+                SerialPort.DATABITS_5, SerialPort.DATABITS_6, SerialPort.DATABITS_7, SerialPort.DATABITS_8
         };
-        JComboBox comBitsBox = new JComboBox(comBitsList);
+        comBitsBox = new JComboBox(comBitsList);
         comBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXX");
         comBitsBox.setPreferredSize(new Dimension(230, 25));
         JPanel jPanelComBitsBox = new JPanel();
         jPanelComBitsBox.add(comBitsBox);
 
         String[] comStopBitsList = {
-                "1", "2", "1.5"
+                "1", "2", "1_5"
         };
-        JComboBox comStopBitsBox = new JComboBox(comStopBitsList);
+        comStopBitsBox = new JComboBox(comStopBitsList);
         comStopBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXX");
         comStopBitsBox.setPreferredSize(new Dimension(230, 25));
         JPanel jPanelComStopBitsBox = new JPanel();
         jPanelComStopBitsBox.add(comStopBitsBox);
         String[] comParityBitsList = {
-                "none", "odd", "even", "mark", "space"
+                "None", "Odd", "Even", "Mark"
         };
-        JComboBox comParityBitsBox = new JComboBox(comParityBitsList);
+        comParityBitsBox = new JComboBox(comParityBitsList);
         comParityBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
         comParityBitsBox.setPreferredSize(new Dimension(230, 25));
         JPanel jPanelComParityBitsBox = new JPanel();
@@ -106,28 +124,29 @@ public class UserFormSettings extends JFrame {
         String[] comSpeedList2 = {
                 "300", "600", "1200", "2400", "4800", "9600", "14400", "28800", "36000", "57600", "115000"
         };
-        JComboBox comSpeedBox2 = new JComboBox(comSpeedList);
+        comSpeedBox2 = new JComboBox(comSpeedList);
         comSpeedBox2.setMaximumSize(new Dimension(10, 5));
         comSpeedBox2.setMaximumRowCount(11);
         comSpeedBox2.setPrototypeDisplayValue("XXXXXXXXXXXXXX");
 
-        String[] comBitsList2 = {
-                "5", "6", "7", "8"
+        Integer[] comBitsList2 = {
+                SerialPort.DATABITS_5, SerialPort.DATABITS_6, SerialPort.DATABITS_7, SerialPort.DATABITS_8
         };
-        JComboBox comBitsBox2 = new JComboBox(comBitsList2);
+        comBitsBox2 = new JComboBox(comBitsList2);
         comBitsBox2.setPrototypeDisplayValue("XXXXXXXXXXXXXXXX");
 
-
         String[] comStopBitsList2 = {
-                "1", "2", "1.5"
+                "1", "2", "1_5"
         };
-        JComboBox comStopBitsBox2 = new JComboBox(comStopBitsList2);
+
+        comStopBitsBox2 = new JComboBox(comStopBitsList2);
         comStopBitsBox2.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXX");
 
         String[] comParityBitsList2 = {
-                "none", "odd", "even", "mark", "space"
+                "None", "Odd", "Even", "Mark"
         };
-        JComboBox comParityBitsBox2 = new JComboBox(comParityBitsList2);
+
+        comParityBitsBox2 = new JComboBox(comParityBitsList2);
         comParityBitsBox2.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
         tabbedPane.setMaximumSize(new Dimension(400, 400));
         JPanel jPanelButtonRegister= new JPanel();
@@ -147,7 +166,6 @@ public class UserFormSettings extends JFrame {
         setComPort1.add(jPanelComStopBitsBox);
         setComPort1.add(comParityBit);
         setComPort1.add(jPanelComParityBitsBox);
-
 
         setComPort2.setLayout(new GridLayout(5, 2, 1, 1));
         setComPort2.add(comSelectedPortTitleOut);
@@ -170,6 +188,7 @@ public class UserFormSettings extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+
     }
     public void getSelectedComPortValue() {
         String selectedComPortValue = comPortBox.getSelectedItem().toString();
@@ -189,8 +208,22 @@ public class UserFormSettings extends JFrame {
     }
     public class TestActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+            ConnectionParams sendPortParams = new ConnectionParams();
+            ConnectionParams receivePortParams = new ConnectionParams();
+            System.out.println(SerialPort.PARITY_NONE);
+            System.out.println(SerialPort.PARITY_ODD);
+            System.out.println(SerialPort.PARITY_MARK);
+            System.out.println(SerialPort.PARITY_EVEN);
+            receivePortParams.baudRate = (int) comSpeedBox.getSelectedItem();
+            receivePortParams.dataBits = (int) comBitsBox.getSelectedItem();
+            receivePortParams.stopBits = comStopBitsBox.getSelectedIndex() + 1;
+            receivePortParams.parity = comParityBitsBox.getSelectedIndex();
+            sendPortParams.baudRate = (int) comSpeedBox2.getSelectedItem();
+            sendPortParams.dataBits = (int) comBitsBox2.getSelectedItem();
+            sendPortParams.stopBits = comStopBitsBox2.getSelectedIndex() + 1;
+            sendPortParams.parity = comParityBitsBox2.getSelectedIndex();
             UserChatWindow userChatWindow = new UserChatWindow(getUserNameFromRegister(),
-                    getComPortSender(), getComPortReceiver());
+                    getComPortSender(), getComPortReceiver(), receivePortParams, sendPortParams);
             dispose();
         }
     }
