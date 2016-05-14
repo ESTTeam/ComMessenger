@@ -8,6 +8,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Objects;
 
 import static java.lang.Thread.sleep;
 
@@ -37,21 +39,19 @@ public class UserChatWindow extends JFrame{
 
     String username;
 
-    public UserChatWindow(String UserName, String ComPortSender, String ComPortReceiver, ConnectionParams receivePortParams,
-                          ConnectionParams sendPortParams) {
+    public UserChatWindow(String UserName, String ComPortSender, String ComPortReceiver) {
         super("Чат - " + UserName );
         DataLinkLayer dataLinkLayer = new DataLinkLayer(new MessageToStation(this),
                 UserName, ComPortSender, ComPortReceiver);
-        dataLinkLayer.setReceivePortParameters(receivePortParams.baudRate, receivePortParams.dataBits, receivePortParams.stopBits,
-                receivePortParams.parity);
-        dataLinkLayer.setSendPortParameters(sendPortParams.baudRate, sendPortParams.dataBits, sendPortParams.stopBits,
-                sendPortParams.parity);
+
         this.dataLinkLayer = dataLinkLayer;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chatWindow = new JTextArea(25, 60);
         model = new DefaultListModel();
         for(String s:dataLinkLayer.getUsers()){
-            model.addElement(s);
+            // if (!Objects.equals(s, UserName)) {
+                model.addElement(s);
+          //  }
         }
         username = UserName;
         usersWindow = new JList(model);
@@ -67,7 +67,7 @@ public class UserChatWindow extends JFrame{
         disconnectButton.addActionListener(disconnectActionListener);
         connectionStatusLabel = new JLabel("Подключено");
         JButton settingsButoon = new JButton("Настройка");
-        if (userCom != "COM11") {
+        if (!Objects.equals(ComPortSender, "COM11")) {
             settingsButoon.setEnabled(false);
         }
         ActionListener settingsActionListener = new SettingsActionListener();
@@ -91,7 +91,7 @@ public class UserChatWindow extends JFrame{
         jPanel.add(new JLabel("                       " +
                 "                             " +
                 "              " +
-                "              "));
+                "  "));
         jPanel.add(settingsButoon);
         jPanel.add(historyButton);
         jPanel.add(sendButton);
@@ -113,8 +113,7 @@ public class UserChatWindow extends JFrame{
     }
     public class SettingsActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            JFrame settingsFrame = new JFrame();
-            settingsFrame.setVisible(true);
+            UserPortSettings userPortSettings = new UserPortSettings(dataLinkLayer);
         }
     }
     public class SendMessageActionListener implements ActionListener {
