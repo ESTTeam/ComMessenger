@@ -66,6 +66,12 @@ public class UserChatWindow extends JFrame{
         ActionListener disconnectActionListener = new DisconnectActionListener();
         disconnectButton.addActionListener(disconnectActionListener);
         connectionStatusLabel = new JLabel("Подключено");
+        JButton settingsButoon = new JButton("Настройка");
+        if (userCom != "COM11") {
+            settingsButoon.setEnabled(false);
+        }
+        ActionListener settingsActionListener = new SettingsActionListener();
+        settingsButoon.addActionListener(settingsActionListener);
         JButton historyButton = new JButton("История");
         JButton sendButton = new JButton("Отправить");
         getRootPane().setDefaultButton(sendButton);
@@ -85,8 +91,8 @@ public class UserChatWindow extends JFrame{
         jPanel.add(new JLabel("                       " +
                 "                             " +
                 "              " +
-                "                                   "));
-
+                "              "));
+        jPanel.add(settingsButoon);
         jPanel.add(historyButton);
         jPanel.add(sendButton);
         jPanel.add(exitButton);
@@ -103,6 +109,12 @@ public class UserChatWindow extends JFrame{
             dataLinkLayer.disconnect();
             dispose();
             UserFormSettings userFormSettings = new UserFormSettings();
+        }
+    }
+    public class SettingsActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            JFrame settingsFrame = new JFrame();
+            settingsFrame.setVisible(true);
         }
     }
     public class SendMessageActionListener implements ActionListener {
