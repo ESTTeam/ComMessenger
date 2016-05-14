@@ -137,13 +137,13 @@ public class UserPortSettings extends JFrame {
         JButton button = new JButton("Далее");
         JPanel jPanelButton = new JPanel(new GridBagLayout());
         jPanelButton.add(button);
-        ActionListener actionListener = new onNextClickListner();
+        ActionListener actionListener = new onNextClickListener();
         button.addActionListener(actionListener);
 
         JButton OKbutton = new JButton("Окей");
         JPanel jPanelOKbutton = new JPanel(new GridBagLayout());
         jPanelOKbutton.add(OKbutton);
-        ActionListener OkayActionListener = new onAcceptClickListner();
+        ActionListener OkayActionListener = new onAcceptClickListener();
         OKbutton.addActionListener(OkayActionListener);
         JButton CancellButton = new JButton("Отмена");
         JButton CancellButton2 = new JButton("Отмена");
@@ -151,7 +151,7 @@ public class UserPortSettings extends JFrame {
         jPanelCancell1.add(CancellButton);
         JPanel jPanelCancell2 = new JPanel(new GridBagLayout());
         jPanelCancell2.add(CancellButton2);
-        ActionListener CancellActionListener = new onCancellClickListner();
+        ActionListener CancellActionListener = new onCancelClickListener();
         CancellButton.addActionListener(CancellActionListener);
         CancellButton2.addActionListener(CancellActionListener);
         setComPort1.setLayout(new GridLayout(5, 2, 1, 1));
@@ -187,7 +187,7 @@ public class UserPortSettings extends JFrame {
 
     }
 
-    public class onAcceptClickListner implements ActionListener {
+    public class onAcceptClickListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             ConnectionParams sendPortParams = new ConnectionParams();
             ConnectionParams receivePortParams = new ConnectionParams();
@@ -199,21 +199,19 @@ public class UserPortSettings extends JFrame {
             sendPortParams.dataBits = (int) comBitsBox2.getSelectedItem();
             sendPortParams.stopBits = comStopBitsBox2.getSelectedIndex() + 1;
             sendPortParams.parity = comParityBitsBox2.getSelectedIndex();
-            dataLinkLayer.setReceivePortParameters(receivePortParams.baudRate, receivePortParams.dataBits, receivePortParams.stopBits,
+            dataLinkLayer.setPortParameters(receivePortParams.baudRate, receivePortParams.dataBits, receivePortParams.stopBits,
                     receivePortParams.parity);
-            dataLinkLayer.setSendPortParameters(sendPortParams.baudRate, sendPortParams.dataBits, sendPortParams.stopBits,
-                    sendPortParams.parity);
             dispose();
         }
     }
 
-    public class onNextClickListner implements ActionListener {
+    public class onNextClickListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             tabbedPane.setSelectedIndex(1);
         }
     }
 
-    public class onCancellClickListner implements ActionListener {
+    public class onCancelClickListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             dispose();
         }
