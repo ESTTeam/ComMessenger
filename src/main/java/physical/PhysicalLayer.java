@@ -31,7 +31,11 @@ public class PhysicalLayer {
 
     private boolean isCurrentStation;
 
-    public PhysicalLayer nextStation;
+    private PhysicalLayer nextStation;
+
+    private boolean hasDataToSend = false;
+
+    byte[] dataToSend;
 
 
     public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
@@ -50,7 +54,8 @@ public class PhysicalLayer {
             portForSend.notifyOnDSR(true);
             portForSend.notifyOnBreakInterrupt(true);
             portForSend.notifyOnCarrierDetect(true);
-        } catch (IOException | NullPointerException | TooManyListenersException e) {}
+        } catch (IOException | NullPointerException | TooManyListenersException e) {
+        }
 
         portForReceive = portService.openPort(portForReceiveName);
         try {
@@ -59,7 +64,8 @@ public class PhysicalLayer {
             portForReceive.notifyOnDataAvailable(true);
             portForReceive.notifyOnBreakInterrupt(true);
             portForReceive.notifyOnCarrierDetect(true);
-        } catch (IOException | NullPointerException | TooManyListenersException e) {}
+        } catch (IOException | NullPointerException | TooManyListenersException e) {
+        }
 
         inUse = true;
         markAsCurrentStation();
@@ -76,7 +82,7 @@ public class PhysicalLayer {
         portForReceive = null;
         inputStream = null;
 
-        inUse =  false;
+        inUse = false;
         isCurrentStation = false;
     }
 
@@ -84,14 +90,16 @@ public class PhysicalLayer {
         portForSend = portService.openPort(portForSendName);
         try {
             outputStream = portForSend.getOutputStream();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
 
         this.portForReceive = portForReceive;
         try {
             inputStream = portForReceive.getInputStream();
             portForReceive.addEventListener(new PortListener(this, dataLinkLayer));
             portForReceive.notifyOnDataAvailable(true);
-        } catch (IOException | TooManyListenersException e) {}
+        } catch (IOException | TooManyListenersException e) {
+        }
     }
 
     public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
@@ -102,17 +110,27 @@ public class PhysicalLayer {
         portService.setPortParameters(portForReceive, baudRate, dataBits, stopBits, parity);
     }
 
-    synchronized void closePortForSend() { portService.closePort(portForSend); }
+    synchronized void closePortForSend() {
+        portService.closePort(portForSend);
+    }
 
-    synchronized void closePortForReceive() { portService.closePort(portForReceive); }
+    synchronized void closePortForReceive() {
+        portService.closePort(portForReceive);
+    }
 
-    public SerialPort getPortForSend() { return portForSend; }
+    public SerialPort getPortForSend() {
+        return portForSend;
+    }
 
-    public SerialPort getPortForReceive() { return portForReceive; }
+    public SerialPort getPortForReceive() {
+        return portForReceive;
+    }
 
-    private String getPortForReceiveName() { return portForReceiveName; }
+    private String getPortForReceiveName() {
+        return portForReceiveName;
+    }
 
-    public synchronized void sendDataToNextStation(byte[] data) {
+    public synchronized void sendDataToNextStation() {
         SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
         if (nextStationPortForReceive != null)
             nextStation.startAsIntermediate(nextStationPortForReceive);
@@ -120,11 +138,13 @@ public class PhysicalLayer {
             nextStation.markAsInUse();
 
         try {
-            outputStream.write(data);
+            outputStream.write(dataToSend);
             outputStream.flush();
         } catch (IOException e) {
             System.out.println("could not write data to output stream, port: " + portForSendName);
         }
+
+        hasDataToSend = false;
     }
 
     synchronized byte[] receiveDataFromPreviousStation() {
@@ -135,7 +155,7 @@ public class PhysicalLayer {
                 inputStream.read(symbol, 0, 1);
 //              TODO: check needless
 //                if (symbol[0] != 0) {
-                    symbolsList.add(symbol[0]);
+                symbolsList.add(symbol[0]);
 //                }
             }
             byte[] message = new byte[symbolsList.size()];
@@ -148,13 +168,36 @@ public class PhysicalLayer {
         }
     }
 
-    boolean inUse() { return inUse; }
+    boolean inUse() {
+        return inUse;
+    }
 
-    boolean isCurrentStation() { return isCurrentStation; }
+    boolean isCurrentStation() {
+        return isCurrentStation;
+    }
 
-    private void markAsInUse() { inUse = true; }
+    private void markAsInUse() {
+        inUse = true;
+    }
 
-    private void markAsCurrentStation() { isCurrentStation = true; }
+    private void markAsCurrentStation() {
+        isCurrentStation = true;
+    }
 
-    InputStream getInputStream() { return inputStream; }
+    InputStream getInputStream() {
+        return inputStream;
+    }
+
+    public boolean hasDataToSend() {
+        return hasDataToSend;
+    }
+
+    public void setDataToSend(byte[] dataToSend) {
+        this.dataToSend = dataToSend;
+        hasDataToSend = true;
+    }
+
+    public void setNextStation(PhysicalLayer nextStation) {
+        this.nextStation = nextStation;
+    }
 }

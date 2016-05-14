@@ -7,7 +7,7 @@ public class PortService {
 
     private static final int TIMEOUT = 200;
 
-    SerialPort openPort(String portName) {
+    public SerialPort openPort(String portName) {
         CommPortIdentifier portId = searchPort(portName);
         if (portId == null) {
             System.out.println("Port " + portName + " not found!");
