@@ -47,6 +47,7 @@ public class UserChatWindow extends JFrame{
         chatWindow.setColumns(60);
         chatWindow.setLineWrap(true);
         chatWindow.setWrapStyleWord(true);
+        chatWindow.setAutoscrolls(true);
         JScrollPane chatWindowPane = new JScrollPane(chatWindow);
         model = new DefaultListModel();
         for(String s:dataLinkLayer.getUsers()){
@@ -132,7 +133,6 @@ public class UserChatWindow extends JFrame{
                             + messageWindow.getText());
                     messageWindow.setText(null);
                 }
-
 
             } catch (NoSuchUserException e1) {
                 e1.printStackTrace();
