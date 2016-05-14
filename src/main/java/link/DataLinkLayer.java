@@ -88,7 +88,8 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void setPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-        for (PhysicalLayer ws : mWsList) {
+        for (String key : mWsNamesMap.keySet()) {
+            PhysicalLayer ws = mWsList.get(mWsNamesMap.get(key));
             ws.setSendPortParameters(baudRate, dataBits, stopBits, parity);
             ws.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
         }
