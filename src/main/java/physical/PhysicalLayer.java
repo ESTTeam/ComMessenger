@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.TooManyListenersException;
 
 public class PhysicalLayer {
@@ -35,7 +36,7 @@ public class PhysicalLayer {
 
     private boolean hasDataToSend = false;
 
-    byte[] dataToSend;
+    Queue<byte[]> dataToSend;
 
 
     public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
@@ -138,13 +139,13 @@ public class PhysicalLayer {
             nextStation.markAsInUse();
 
         try {
-            outputStream.write(dataToSend);
+            outputStream.write(dataToSend.poll());
             outputStream.flush();
         } catch (IOException e) {
             System.out.println("could not write data to output stream, port: " + portForSendName);
         }
 
-        hasDataToSend = false;
+        if (dataToSend.peek() == null) hasDataToSend = false;
     }
 
     synchronized byte[] receiveDataFromPreviousStation() {
@@ -192,8 +193,8 @@ public class PhysicalLayer {
         return hasDataToSend;
     }
 
-    public void setDataToSend(byte[] dataToSend) {
-        this.dataToSend = dataToSend;
+    public void setDataToSend(byte[] data) {
+        dataToSend.add(data);
         hasDataToSend = true;
     }
 
