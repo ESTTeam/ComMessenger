@@ -2,7 +2,6 @@ package user;
 
 import link.DataLinkLayer;
 import link.NoSuchUserException;
-import physical.PhysicalLayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -110,7 +109,7 @@ public class UserChatWindow extends JFrame{
         public void actionPerformed(ActionEvent e) {
             try {
                 chatWindow.append("Я" + " > " + messageWindow.getText() +"\n");
-                dataLinkLayer.sendDataTo(usersWindow.getSelectedValue().toString(), username + " > "
+                dataLinkLayer.setDataToSend(usersWindow.getSelectedValue().toString(), username + " > "
                         + messageWindow.getText() + "\n" );
 
             } catch (NoSuchUserException e1) {

@@ -8,7 +8,9 @@ public class Frame {
         REGISTRATION_RESPONSE,
         DISCONNECT,
         ACKNOWLEDGMENT,
-        REPETITION
+        REPETITION,
+        MARKER,
+        FIRST_TEST
     }
 
     private enum ControlFields {
