@@ -6,10 +6,7 @@ import javax.comm.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.TooManyListenersException;
+import java.util.*;
 
 public class PhysicalLayer {
     private final PortService portService;
@@ -36,7 +33,7 @@ public class PhysicalLayer {
 
     private boolean hasDataToSend = false;
 
-    Queue<byte[]> dataToSend;
+    Queue<byte[]> dataToSend = new LinkedList<>();
 
 
     public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
@@ -101,6 +98,8 @@ public class PhysicalLayer {
             portForReceive.notifyOnDataAvailable(true);
         } catch (IOException | TooManyListenersException e) {
         }
+
+
     }
 
     public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
@@ -145,7 +144,7 @@ public class PhysicalLayer {
             System.out.println("could not write data to output stream, port: " + portForSendName);
         }
 
-        if (dataToSend.peek() == null) hasDataToSend = false;
+        if (dataToSend.isEmpty()) hasDataToSend = false;
     }
 
     synchronized byte[] receiveDataFromPreviousStation() {
