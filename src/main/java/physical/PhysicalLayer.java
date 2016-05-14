@@ -131,6 +131,11 @@ public class PhysicalLayer {
     }
 
     public synchronized void sendDataToNextStation() {
+        sendDataToNextStation(dataToSend.poll());
+        if (dataToSend.isEmpty()) hasDataToSend = false;
+    }
+
+    public synchronized void sendDataToNextStation(byte[] data) {
         SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
         if (nextStationPortForReceive != null)
             nextStation.startAsIntermediate(nextStationPortForReceive);
@@ -138,20 +143,25 @@ public class PhysicalLayer {
             nextStation.markAsInUse();
 
         try {
-            outputStream.write(dataToSend.poll());
+            outputStream.write(data);
             outputStream.flush();
         } catch (IOException e) {
             System.out.println("could not write data to output stream, port: " + portForSendName);
         }
-
-        if (dataToSend.isEmpty()) hasDataToSend = false;
     }
 
     synchronized byte[] receiveDataFromPreviousStation() {
         List<Byte> symbolsList = new ArrayList<>();
         byte[] symbol = new byte[1];
         try {
-            while (symbol[0] != '\n') {
+//            inputStream.read(symbol, 0, 1);
+//            symbolsList.add(symbol[0]);
+//            symbol[0] = (byte) 0xFE;
+            boolean a = false;
+            while (!a) {
+                if (inputStream.available() == 1) {
+                    a=true;
+                }
                 inputStream.read(symbol, 0, 1);
 //              TODO: check needless
 //                if (symbol[0] != 0) {

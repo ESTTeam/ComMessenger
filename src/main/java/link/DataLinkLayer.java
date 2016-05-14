@@ -100,8 +100,13 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
         Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.MARKER, new byte[0]);
         byte[] packet = Packer.pack(frame.getFrame());
-        mPhysicalLayer.setDataToSend(packet);
-        mPhysicalLayer.sendDataToNextStation();
+
+        try {
+            sleep(SENDING_TIMEOUT);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mPhysicalLayer.sendDataToNextStation(packet);
     }
 
     private void sendFirstTest() {
@@ -394,7 +399,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void onFirstTestPacketReceived(byte[] packet, Frame frame) {
-        if (frame.getDestination() == mId) {
+        if (frame.getSource() == mId) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
             System.out.println("Received FirstTest from " + (frame.getSource() + 1) + " on " + (mId + 1));
@@ -414,6 +419,12 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
         if (!mPhysicalLayer.hasDataToSend()) {
             mPhysicalLayer.setDataToSend(packet);
+        }
+
+        try {
+            sleep(SENDING_TIMEOUT);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         mPhysicalLayer.sendDataToNextStation();
     }

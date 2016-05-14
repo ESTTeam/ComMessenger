@@ -42,10 +42,10 @@ public class UserChatWindow extends JFrame{
         super("Чат - " + UserName );
         DataLinkLayer dataLinkLayer = new DataLinkLayer(new MessageToStation(this),
                 UserName, ComPortSender, ComPortReceiver);
-        dataLinkLayer.setReceivePortParameters(receivePortParams.baudRate, receivePortParams.dataBits, receivePortParams.stopBits,
-                receivePortParams.parity);
-        dataLinkLayer.setSendPortParameters(sendPortParams.baudRate, sendPortParams.dataBits, sendPortParams.stopBits,
-                sendPortParams.parity);
+//        dataLinkLayer.setReceivePortParameters(receivePortParams.baudRate, receivePortParams.dataBits, receivePortParams.stopBits,
+//                receivePortParams.parity);
+//        dataLinkLayer.setSendPortParameters(sendPortParams.baudRate, sendPortParams.dataBits, sendPortParams.stopBits,
+//                sendPortParams.parity);
         this.dataLinkLayer = dataLinkLayer;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chatWindow = new JTextArea(25, 60);
