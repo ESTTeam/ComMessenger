@@ -233,7 +233,13 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             try {
                 byte[] data = Decoder.decode(frame.getData());
 
-                mUserLayer.onMessageReceive(new String(data));
+                String sourceUserName = null;
+                for (String key : mWsNamesMap.keySet()) {
+                    if (mWsNamesMap.get(key) == frame.getSource()) {
+                        sourceUserName = key;
+                    }
+                }
+                mUserLayer.onMessageReceive(sourceUserName, new String(data));
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
