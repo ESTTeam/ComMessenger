@@ -36,6 +36,8 @@ public class PhysicalLayer {
 
     Queue<byte[]> dataToSend = new LinkedList<>();
 
+    private boolean isDisconnecting = false;
+
 
     public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
         this.dataLinkLayer = dataLinkLayer;
@@ -138,10 +140,12 @@ public class PhysicalLayer {
 
     public synchronized void sendDataToNextStation(byte[] data) {
         SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
-        if (nextStationPortForReceive != null)
+        if (nextStationPortForReceive != null) {
             nextStation.startAsIntermediate(nextStationPortForReceive);
-        else
+            nextStation.markAsNotInUse();
+        } else {
             nextStation.markAsInUse();
+        }
 
         try {
             outputStream.write(data);
@@ -187,8 +191,10 @@ public class PhysicalLayer {
         return isCurrentStation;
     }
 
-    private void markAsInUse() {
-        inUse = true;
+    private void markAsInUse() { inUse = true; }
+
+    public void markAsNotInUse() {
+        inUse = false;
     }
 
     private void markAsCurrentStation() {
@@ -210,5 +216,13 @@ public class PhysicalLayer {
 
     public void setNextStation(PhysicalLayer nextStation) {
         this.nextStation = nextStation;
+    }
+
+    public boolean isDisconnecting() {
+        return isDisconnecting;
+    }
+
+    public void setDisconnecting(boolean disconnecting) {
+        isDisconnecting = disconnecting;
     }
 }

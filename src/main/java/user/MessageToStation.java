@@ -5,9 +5,11 @@ package user;
  */
 public class MessageToStation implements OnMessageReceiveListener {
     public UserChatWindow userChatWindow;
+
     public MessageToStation (UserChatWindow userChatWindow) {
         this.userChatWindow = userChatWindow;
     }
+
     @Override
     public void onMessageReceive(String userName, String data) {
         userChatWindow.chatWindow.append(data +"\n");
@@ -22,6 +24,11 @@ public class MessageToStation implements OnMessageReceiveListener {
     public void onUserDelete(String userName) {
         int indexRemovingUser = userChatWindow.model.indexOf(userName);
         userChatWindow.model.remove(indexRemovingUser);
+    }
+
+    @Override
+    public void onDisconnect() {
+
     }
 
 }

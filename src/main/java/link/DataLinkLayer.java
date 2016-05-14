@@ -73,11 +73,14 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
         byte[] encodedDataBytes = Encoder.encode(mUserName.getBytes());
-        Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.DISCONNECT, encodedDataBytes);
+        byte[] data = new byte[encodedDataBytes.length + 1];
+        System.arraycopy(encodedDataBytes, 0, data, 0, encodedDataBytes.length);
+        data[data.length - 1] = 0;
+        Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.DISCONNECT, data);
         byte[] packet = Packer.pack(frame.getFrame());
         mPhysicalLayer.setDataToSend(packet);
 
-        mPhysicalLayer.stop();
+        mPhysicalLayer.setDisconnecting(true);
     }
 
     public List<String> getUsers() {
@@ -223,7 +226,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                     onMarkerPacketReceived(packet, frame);
                     break;
                 case FIRST_TEST:
-                    onFirstTestPacketReceived(packet, frame);
+                    onFirstTestPacketReceived(frame);
                     break;
                 default:
                     break;
@@ -332,21 +335,40 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         System.out.println("Received Disconnect from " + (frame.getSource() + 1) + " on " + (mId + 1));
         System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
                 + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
-        //// TODO:  AddTimeout
+
         if (frame.getSource() != mId) {
             try {
-                String userName = new String(Decoder.decode(frame.getData()));
+                int frameDataLength = frame.getData().length;
+                byte[] data = new byte[frameDataLength - 1];
+                System.arraycopy(frame.getData(), 0, data, 0, frameDataLength - 1);
+
+                boolean needToSendMarker = false;
+                if (frame.getData()[frameDataLength - 1] == 0) {
+                    needToSendMarker = true;
+
+                    byte[] newData = new byte[frameDataLength];
+                    System.arraycopy(frame.getData(), 0, newData, 0, frameDataLength - 1);
+                    newData[frameDataLength - 1] = 1;
+                    frame.setData(newData);
+                    packet = Packer.pack(frame.getFrame());
+                }
+
+                String userName = new String(Decoder.decode(data));
 
                 mWsNamesMap.remove(userName);
                 mUserLayer.onUserDelete(userName);
                 mPhysicalLayer.setDataToSend(packet);
                 mPhysicalLayer.sendDataToNextStation();
+
+                if (needToSendMarker) {
+                    sendMarker();
+                }
             } catch (TransmissionFailedException e) {
-                sendMarker();
                 e.printStackTrace();
             }
         } else {
-            sendMarker();
+            mPhysicalLayer.stop();
+            mUserLayer.onDisconnect();
         }
     }
 
@@ -404,7 +426,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         }
     }
 
-    private void onFirstTestPacketReceived(byte[] packet, Frame frame) {
+    private void onFirstTestPacketReceived(Frame frame) {
         if (frame.getSource() == mId) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
@@ -417,14 +439,16 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void onMarkerPacketReceived(byte[] packet, Frame frame) {
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        System.out.println("Received Marker from " + (frame.getSource() + 1) + " on " + (mId + 1));
-//        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
-//                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+        //Calendar calendar = Calendar.getInstance();
+        //calendar.setTimeInMillis(System.currentTimeMillis());
+        //System.out.println("Received Marker from " + (frame.getSource() + 1) + " on " + (mId + 1));
+        //System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+        //        + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
-        if (!mPhysicalLayer.hasDataToSend()) {
-            mPhysicalLayer.setDataToSend(packet);
+        if (!mPhysicalLayer.isDisconnecting()) {
+            if (!mPhysicalLayer.hasDataToSend()) {
+                mPhysicalLayer.setDataToSend(packet);
+            }
         }
 
         try {

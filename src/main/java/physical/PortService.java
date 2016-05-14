@@ -1,6 +1,7 @@
 package physical;
 
 import javax.comm.*;
+import java.util.Calendar;
 import java.util.Enumeration;
 
 public class PortService {
@@ -23,6 +24,11 @@ public class PortService {
     void closePort(SerialPort port) {
         if (port != null)
             port.close();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        System.out.println("Port " + port.getName() + " closed");
+//        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+//                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
     }
 
     void setPortParameters(SerialPort port, int baudRate, int dataBits, int stopBits, int parity) {

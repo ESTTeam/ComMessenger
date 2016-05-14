@@ -120,6 +120,10 @@ public class Frame {
         return mFrameType;
     }
 
+    public void setData(byte[] data) {
+        mData = data;
+    }
+
     public byte[] getData() {
         return mData;
     }
