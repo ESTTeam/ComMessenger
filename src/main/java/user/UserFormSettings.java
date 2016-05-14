@@ -15,14 +15,9 @@ import static javax.swing.JOptionPane.showMessageDialog;
 
 public class UserFormSettings extends JFrame {
 
-    JLabel comSelectedPortIn;
-
     JComboBox comPortBox;
 
-    JLabel comSelectedPortOut;
-
     JTextField userName;
-
 
     public UserFormSettings() {
 
