@@ -1,6 +1,7 @@
 package physical;
 
 import link.OnPacketReceiveListener;
+import link.packing.Frame;
 
 import javax.comm.SerialPort;
 import java.io.IOException;
@@ -152,21 +153,21 @@ public class PhysicalLayer {
 
     synchronized byte[] receiveDataFromPreviousStation() {
         List<Byte> symbolsList = new ArrayList<>();
-        byte[] symbol = new byte[1];
         try {
-//            inputStream.read(symbol, 0, 1);
-//            symbolsList.add(symbol[0]);
-//            symbol[0] = (byte) 0xFE;
-            boolean a = false;
-            while (!a) {
-                if (inputStream.available() == 1) {
-                    a=true;
-                }
+            byte[] symbol = new byte[1];
+
+            boolean wasStop = false;
+            while (true) {
                 inputStream.read(symbol, 0, 1);
-//              TODO: check needless
-//                if (symbol[0] != 0) {
                 symbolsList.add(symbol[0]);
-//                }
+
+                if (symbol[0] == Frame.STOP_BYTE) {
+                    wasStop = true;
+                } else if (wasStop && symbol[0] != Frame.START_BYTE) {
+                    break;
+                } else {
+                    wasStop = false;
+                }
             }
             byte[] message = new byte[symbolsList.size()];
             int offset = 0;

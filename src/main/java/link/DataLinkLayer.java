@@ -16,7 +16,7 @@ import static java.lang.Thread.sleep;
 
 public class DataLinkLayer implements OnPacketReceiveListener {
 
-    private static final int SENDING_TIMEOUT = 250;
+    private static final int SENDING_TIMEOUT = 300;
 
     private final int mId;
     private final String mUserName;
@@ -411,11 +411,11 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void onMarkerPacketReceived(byte[] packet, Frame frame) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        System.out.println("Received Marker from " + (frame.getSource() + 1) + " on " + (mId + 1));
-        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
-                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        System.out.println("Received Marker from " + (frame.getSource() + 1) + " on " + (mId + 1));
+//        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+//                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
         if (!mPhysicalLayer.hasDataToSend()) {
             mPhysicalLayer.setDataToSend(packet);
