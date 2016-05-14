@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import static java.lang.Thread.sleep;
+import static javax.swing.JOptionPane.showMessageDialog;
 
 /**
  * Created by Igor on 09.05.16.
@@ -33,10 +34,6 @@ public class UserChatWindow extends JFrame{
 
     private DataLinkLayer dataLinkLayer;
 
-    JLabel spaceLabel;
-
-    Border border = BorderFactory.createLineBorder(Color.BLACK);
-
     String username;
 
     public UserChatWindow(String UserName, String ComPortSender, String ComPortReceiver) {
@@ -46,18 +43,23 @@ public class UserChatWindow extends JFrame{
 
         this.dataLinkLayer = dataLinkLayer;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        chatWindow = new JTextArea(25, 60);
+        chatWindow = new JTextArea(25, 30);
+        chatWindow.setColumns(60);
+        chatWindow.setLineWrap(true);
+        chatWindow.setWrapStyleWord(true);
+        chatWindow.setAutoscrolls(true);
+        JScrollPane chatWindowPane = new JScrollPane(chatWindow);
         model = new DefaultListModel();
         for(String s:dataLinkLayer.getUsers()){
-            // if (!Objects.equals(s, UserName)) {
+             if (!Objects.equals(s, UserName)) {
                 model.addElement(s);
-          //  }
+             }
         }
         username = UserName;
         usersWindow = new JList(model);
         usersWindow.setBackground(Color.WHITE);
         usersWindow.setMinimumSize(new Dimension(500, 5000));
-        usersWindow.setVisibleRowCount(22);
+        usersWindow.setVisibleRowCount(25);
         usersWindow.setFixedCellWidth(108);
         JScrollPane scrollPane = new JScrollPane(usersWindow);
         scrollPane.setMinimumSize(new Dimension(50, 500));
@@ -83,7 +85,7 @@ public class UserChatWindow extends JFrame{
         usersWindow.setLayoutOrientation(JList.VERTICAL);
         messageWindow.setPreferredSize(new Dimension(777, 25));
         jPanel = new JPanel();
-        jPanel.add(chatWindow);
+        jPanel.add(chatWindowPane);
         jPanel.add(scrollPane);
         jPanel.add(messageWindow);
         jPanel.add(disconnectButton);
@@ -119,9 +121,18 @@ public class UserChatWindow extends JFrame{
     public class SendMessageActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             try {
-                chatWindow.append("Я" + " > " + messageWindow.getText() +"\n");
-                dataLinkLayer.setDataToSend(usersWindow.getSelectedValue().toString(), username + " > "
-                        + messageWindow.getText() + "\n" );
+                if (usersWindow.isSelectionEmpty()) {
+                    showMessageDialog(null, "Необходимо выбрать адресата");
+                }
+                else if (messageWindow.getText().isEmpty()) {
+                    showMessageDialog(null, "Введите сообщение");
+                }
+                else {
+                    chatWindow.append("Я" + " > " + messageWindow.getText() + "\n");
+                    dataLinkLayer.setDataToSend(usersWindow.getSelectedValue().toString(), username + " > "
+                            + messageWindow.getText());
+                    messageWindow.setText(null);
+                }
 
             } catch (NoSuchUserException e1) {
                 e1.printStackTrace();

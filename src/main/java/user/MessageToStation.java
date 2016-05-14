@@ -12,7 +12,7 @@ public class MessageToStation implements OnMessageReceiveListener {
 
     @Override
     public void onMessageReceive(String userName, String data) {
-        userChatWindow.chatWindow.append(data +"\n");
+        userChatWindow.chatWindow.append(data + "\n");
     }
 
     @Override
