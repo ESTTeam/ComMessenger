@@ -32,7 +32,7 @@ class PortListener implements SerialPortEventListener {
                 if (!physicalLayer.inUse()) {
                     byte[] receivedMessage = physicalLayer.receiveDataFromPreviousStation();
                     try { physicalLayer.getInputStream().reset(); } catch (IOException e) {}
-                    physicalLayer.sendDataToNextStation(receivedMessage);
+                    physicalLayer.sendDataToNextStation();
                     physicalLayer.closePortForReceive();
                     physicalLayer.closePortForSend();
                 } else if (physicalLayer.isCurrentStation()){
