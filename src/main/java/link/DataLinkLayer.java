@@ -24,10 +24,11 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     private final OnMessageReceiveListener mUserLayer;
 
     private Map<String, Integer> mWsNamesMap;
+    private List<PhysicalLayer> mWsList;
 
     private String mLastSentDestination = null;
     private String mLastSentData = null;
-                //ToDO CheckUseExistence
+
     public DataLinkLayer(OnMessageReceiveListener userLayer, String userName, String portSender, String portReceiver) {
         mUserLayer = userLayer;
         mId = Character.getNumericValue(portSender.charAt(3)) - 1;
@@ -38,25 +39,25 @@ public class DataLinkLayer implements OnPacketReceiveListener {
 
     private void wsListInitialization() {
         PortService portService = new PortService();
-        List<PhysicalLayer> wsList = new ArrayList<>();
-        wsList.add(new PhysicalLayer (this, portService, "COM11", "COM12"));
-        wsList.add(new PhysicalLayer (this, portService, "COM21", "COM22"));
-        wsList.add(new PhysicalLayer (this, portService, "COM31", "COM32"));
-        wsList.add(new PhysicalLayer (this, portService, "COM41", "COM42"));
-        wsList.add(new PhysicalLayer (this, portService, "COM51", "COM52"));
+        mWsList = new ArrayList<>();
+        mWsList.add(new PhysicalLayer (this, portService, "COM11", "COM12"));
+        mWsList.add(new PhysicalLayer (this, portService, "COM21", "COM22"));
+        mWsList.add(new PhysicalLayer (this, portService, "COM31", "COM32"));
+        mWsList.add(new PhysicalLayer (this, portService, "COM41", "COM42"));
+        mWsList.add(new PhysicalLayer (this, portService, "COM51", "COM52"));
 
-        for (int i = 0; i < wsList.size(); ++i) {
-            if (i != wsList.size() - 1) {
-                wsList.get(i).setNextStation(wsList.get(i + 1));
+        for (int i = 0; i < mWsList.size(); ++i) {
+            if (i != mWsList.size() - 1) {
+                mWsList.get(i).setNextStation(mWsList.get(i + 1));
             } else {
-                wsList.get(i).setNextStation(wsList.get(0));
+                mWsList.get(i).setNextStation(mWsList.get(0));
             }
         }
 
-        mPhysicalLayer = wsList.get(mId);
+        mPhysicalLayer = mWsList.get(mId);
         mPhysicalLayer.start();
 
-        mWsNamesMap = new HashMap<>(wsList.size());
+        mWsNamesMap = new HashMap<>(mWsList.size());
         mWsNamesMap.put(mUserName, mId);
 
         sendFirstTest();
@@ -84,11 +85,15 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-        mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+        for (PhysicalLayer ws : mWsList) {
+            ws.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+        }
     }
 
     public void setReceivePortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-        mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+        for (PhysicalLayer ws : mWsList) {
+            ws.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+        }
     }
 
     private void sendMarker() {
