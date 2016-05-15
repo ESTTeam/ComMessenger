@@ -1,7 +1,6 @@
 package physical;
 
 import javax.comm.*;
-import java.util.Calendar;
 import java.util.Enumeration;
 
 public class PortService {

@@ -7,8 +7,8 @@ import javax.comm.SerialPortEventListener;
 import java.io.IOException;
 
 class PortListener implements SerialPortEventListener {
-    private PhysicalLayer physicalLayer;
-    private OnPacketReceiveListener dataLinkLayer;
+    private final PhysicalLayer physicalLayer;
+    private final OnPacketReceiveListener dataLinkLayer;
 
     PortListener(PhysicalLayer physicalLayer, OnPacketReceiveListener dataLinkLayer)
     {
