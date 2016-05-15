@@ -12,6 +12,7 @@ public class Frame {
         DISCONNECT,
         ACKNOWLEDGMENT,
         REPETITION,
+        PORT_PARAMETERS,
         MARKER,
         FIRST_TEST
     }

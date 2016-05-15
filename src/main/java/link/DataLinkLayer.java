@@ -10,6 +10,7 @@ import physical.PhysicalLayer;
 import physical.PortService;
 import user.OnMessageReceiveListener;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -20,7 +21,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     private static final int SHORT_SENDING_TIMEOUT = 50;
 
     private final int mId;
-    private final int nextId;
+    private final int mNextId;
     private final String mUserName;
     private PhysicalLayer mPhysicalLayer;
     private final OnMessageReceiveListener mUserLayer;
@@ -34,7 +35,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     public DataLinkLayer(OnMessageReceiveListener userLayer, String userName, String portSender, String portReceiver) {
         mUserLayer = userLayer;
         mId = Character.getNumericValue(portSender.charAt(3)) - 1;
-        nextId = (mId == 4) ? 0 : mId + 1;
+        mNextId = (mId == 4) ? 0 : mId + 1;
         mUserName = userName;
 
         wsListInitialization();
@@ -93,9 +94,9 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void setPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-            PhysicalLayer ws = mWsList.get(0);
-            ws.setSendPortParameters(baudRate, dataBits, stopBits, parity);
-            ws.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+        mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+        sendPortParameters(baudRate, dataBits, stopBits, parity);
+        mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
     }
 
     private void sendMarker() {
@@ -109,7 +110,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         byte[] packet = Packer.pack(frame.getFrame());
 
         try {
-            sleep(mWsList.get(nextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
+            sleep(mWsList.get(mNextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -127,6 +128,31 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         byte[] packet = Packer.pack(frame.getFrame());
         mPhysicalLayer.setDataToSend(packet);
         mPhysicalLayer.sendDataToNextStation();
+    }
+
+    private void sendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        System.out.println("Sending PortParameters from " + (mId + 1));
+        System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+        byte[] baudRateBytes = ByteBuffer.allocate(4).putInt(baudRate).array();
+        byte[] dataBitsBytes = ByteBuffer.allocate(4).putInt(dataBits).array();
+        byte[] stopBitsBytes = ByteBuffer.allocate(4).putInt(stopBits).array();
+        byte[] parityBytes = ByteBuffer.allocate(4).putInt(parity).array();
+        byte[] data = new byte[baudRateBytes.length + dataBitsBytes.length
+                + stopBitsBytes.length + parityBytes.length];
+        System.arraycopy(baudRateBytes, 0, data, 0, baudRateBytes.length);
+        System.arraycopy(dataBitsBytes, 0, data, baudRateBytes.length, dataBitsBytes.length);
+        System.arraycopy(stopBitsBytes, 0, data, baudRateBytes.length + dataBitsBytes.length, stopBitsBytes.length);
+        System.arraycopy(parityBytes, 0, data, baudRateBytes.length + dataBitsBytes.length + stopBitsBytes.length,
+                parityBytes.length);
+
+        data = Encoder.encode(data);
+        Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.PORT_PARAMETERS, data);
+        byte[] packet = Packer.pack(frame.getFrame());
+        mPhysicalLayer.sendDataToNextStation(packet);
     }
 
     public void setDataToSend(String destinationUser, String data) throws NoSuchUserException {
@@ -226,6 +252,9 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 case REPETITION:
                     onRepetitionPacketReceived(packet, frame);
                     break;
+                case PORT_PARAMETERS:
+                    onPortParametersPacketReceived(packet, frame);
+                    break;
                 case MARKER:
                     onMarkerPacketReceived(packet, frame);
                     break;
@@ -288,7 +317,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 mPhysicalLayer.setDataToSend(packet);
 
                 try {
-                    sleep(mWsList.get(nextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
+                    sleep(mWsList.get(mNextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -326,7 +355,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             }
         } else {
             try {
-                sleep(mWsList.get(nextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
+                sleep(mWsList.get(mNextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -396,7 +425,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             sendMarker();
         } else {
             try {
-                sleep(mWsList.get(nextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
+                sleep(mWsList.get(mNextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -428,12 +457,48 @@ public class DataLinkLayer implements OnPacketReceiveListener {
             }
         } else {
             try {
-                sleep(mWsList.get(nextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
+                sleep(mWsList.get(mNextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             mPhysicalLayer.setDataToSend(packet);
             mPhysicalLayer.sendDataToNextStation();
+        }
+    }
+
+    private void onPortParametersPacketReceived(byte[] packet, Frame frame) {
+        if (frame.getSource() != mId) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            System.out.println("Received PortParameters from " + (frame.getSource() + 1) + " on " + (mId + 1));
+            System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                    + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
+
+            try {
+                byte[] data = Decoder.decode(frame.getData());
+
+                byte[] baudRateBytes = new byte[4];
+                byte[] dataBitsBytes = new byte[4];
+                byte[] stopBitsBytes = new byte[4];
+                byte[] parityBytes = new byte[4];
+                System.arraycopy(data, 0, baudRateBytes, 0, baudRateBytes.length);
+                System.arraycopy(data, baudRateBytes.length, dataBitsBytes, 0, dataBitsBytes.length);
+                System.arraycopy(data, baudRateBytes.length + dataBitsBytes.length, stopBitsBytes, 0, stopBitsBytes.length);
+                System.arraycopy(data, baudRateBytes.length + dataBitsBytes.length + stopBitsBytes.length, parityBytes, 0,
+                        parityBytes.length);
+
+                int baudRate = ByteBuffer.wrap(baudRateBytes).getInt();
+                int dataBits = ByteBuffer.wrap(dataBitsBytes).getInt();
+                int stopBits = ByteBuffer.wrap(stopBitsBytes).getInt();
+                int parity = ByteBuffer.wrap(parityBytes).getInt();
+
+                mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+                mPhysicalLayer.sendDataToNextStation(packet);
+                mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+
+            } catch (TransmissionFailedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -463,7 +528,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         }
 
         try {
-            sleep(mWsList.get(nextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
+            sleep(mWsList.get(mNextId).inUse() ? SHORT_SENDING_TIMEOUT : SENDING_TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
