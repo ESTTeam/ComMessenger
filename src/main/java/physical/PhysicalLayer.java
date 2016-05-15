@@ -35,6 +35,8 @@ public class PhysicalLayer {
 
     private PhysicalLayer nextStation;
 
+    private boolean iu = false;
+
     private boolean hasDataToSend = false;
 
     final Queue<byte[]> dataToSend = new LinkedList<>();
@@ -106,7 +108,7 @@ public class PhysicalLayer {
     }
 
     public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-        portService.setPortParameters(portForSend, baudRate, dataBits, stopBits, parity);
+        //portService.setPortParameters(portForSend, baudRate, dataBits, stopBits, parity);
     }
 
     public void setReceivePortParameters(int baudRate, int dataBits, int stopBits, int parity) {
@@ -136,6 +138,13 @@ public class PhysicalLayer {
             if (nextStationPortForReceive != null) {
                 nextStation.startAsIntermediate(nextStationPortForReceive);
                 nextStation.markAsNotInUse();
+                if (iu) {
+                    int baudRate = portForReceive.getBaudRate();
+                    int dataBits = portForReceive.getDataBits();
+                    int stopBits = portForReceive.getStopBits();
+                    int parity = portForReceive.getParity();
+                    nextStation.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+                }
             } else {
                 nextStation.markAsInUse();
             }
@@ -147,19 +156,12 @@ public class PhysicalLayer {
             }
         }
 
-       /* if (dataLinkLayer.getMasterStation().inUse()) {
-            SerialPort masterStationPort = portService.searchPort("COM11").
-            int baudRate = masterStationPort.getBaudRate();
-            int dataBits = masterStationPort.getDataBits();
-            int stopBits = masterStationPort.getStopBits();
-            int parity = masterStationPort.getParity();
-            setSendPortParameters(baudRate, dataBits, stopBits, parity);
-            nextStation.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
-        }*/
-
         try {
             outputStream.write(data);
             outputStream.flush();
+            if (iu)
+                setSendPortParameters(portForReceive.getBaudRate(), portForReceive.getDataBits(),
+                    portForReceive.getStopBits(), portForReceive.getParity());
         } catch (IOException e) {
             System.out.println("could not write data to output stream, port: " + portForSendName);
         }
@@ -237,4 +239,8 @@ public class PhysicalLayer {
     }
 
     public String getPortForSendName() { return portForSendName; }
+
+    public SerialPort getPortForSend() { return  portForSend; }
+
+    public SerialPort getPortForReceive() { return portForReceive; }
 }

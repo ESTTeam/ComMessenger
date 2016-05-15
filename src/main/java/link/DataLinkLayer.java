@@ -94,9 +94,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void setPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-        mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
         sendPortParameters(baudRate, dataBits, stopBits, parity);
-        mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
     }
 
     private void sendMarker() {
@@ -152,7 +150,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         data = Encoder.encode(data);
         Frame frame = new Frame((byte) mId, Frame.BROADCAST_BYTE, Frame.FrameTypes.PORT_PARAMETERS, data);
         byte[] packet = Packer.pack(frame.getFrame());
-        mPhysicalLayer.sendDataToNextStation(packet);
+        mPhysicalLayer.setDataToSend(packet);
     }
 
     public void setDataToSend(String destinationUser, String data) throws NoSuchUserException {
@@ -467,7 +465,7 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void onPortParametersPacketReceived(byte[] packet, Frame frame) {
-        if (frame.getSource() != mId) {
+        //if (frame.getSource() != mId) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
             System.out.println("Received PortParameters from " + (frame.getSource() + 1) + " on " + (mId + 1));
@@ -492,14 +490,21 @@ public class DataLinkLayer implements OnPacketReceiveListener {
                 int stopBits = ByteBuffer.wrap(stopBitsBytes).getInt();
                 int parity = ByteBuffer.wrap(parityBytes).getInt();
 
+
                 mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
-                mPhysicalLayer.sendDataToNextStation(packet);
+                if (mId != 0) {
+                    mPhysicalLayer.sendDataToNextStation(packet);
+                }
                 mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
+                if (mId == 0) {
+                    sendMarker();
+                }
+
 
             } catch (TransmissionFailedException e) {
                 e.printStackTrace();
             }
-        }
+        //}
     }
 
     private void onFirstTestPacketReceived(Frame frame) {
