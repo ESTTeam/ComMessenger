@@ -109,7 +109,11 @@ public class UserChatWindow extends JFrame{
     public class DisconnectActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             dataLinkLayer.disconnect();
-            dispose();
+            try {
+                sleep(200);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
             UserFormSettings userFormSettings = new UserFormSettings();
         }
     }
@@ -142,8 +146,12 @@ public class UserChatWindow extends JFrame{
     public class ExitActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             dataLinkLayer.disconnect();
+            try {
+                sleep(600);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
             System.exit(0);
-
         }
     }
 

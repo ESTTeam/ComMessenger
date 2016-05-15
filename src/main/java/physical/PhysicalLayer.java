@@ -1,5 +1,6 @@
 package physical;
 
+import link.DataLinkLayer;
 import link.OnPacketReceiveListener;
 import link.packing.Frame;
 
@@ -14,7 +15,7 @@ import static java.lang.Thread.sleep;
 public class PhysicalLayer {
     private final PortService portService;
 
-    private final OnPacketReceiveListener dataLinkLayer;
+    private final DataLinkLayer dataLinkLayer;
 
     private SerialPort portForSend;
 
@@ -40,8 +41,7 @@ public class PhysicalLayer {
 
     private boolean isDisconnecting = false;
 
-
-    public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
+    public PhysicalLayer(DataLinkLayer dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
         this.dataLinkLayer = dataLinkLayer;
         this.portService = portService;
         this.portForSendName = portForSendName;
@@ -103,8 +103,6 @@ public class PhysicalLayer {
             portForReceive.notifyOnDataAvailable(true);
         } catch (IOException | TooManyListenersException e) {
         }
-
-
     }
 
     public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
@@ -133,7 +131,6 @@ public class PhysicalLayer {
     }
 
     public synchronized void sendDataToNextStation(byte[] data) {
-        System.out.println(nextStation.inUse() + " " + nextStation.getPortForReceiveName());
         if (!nextStation.inUse()) {
             SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
             if (nextStationPortForReceive != null) {
@@ -141,7 +138,6 @@ public class PhysicalLayer {
                 nextStation.markAsNotInUse();
             } else {
                 nextStation.markAsInUse();
-                System.out.println("markAsInUse()");
             }
         } else {
             try {
@@ -150,6 +146,16 @@ public class PhysicalLayer {
                 e.printStackTrace();
             }
         }
+
+       /* if (dataLinkLayer.getMasterStation().inUse()) {
+            SerialPort masterStationPort = portService.searchPort("COM11").
+            int baudRate = masterStationPort.getBaudRate();
+            int dataBits = masterStationPort.getDataBits();
+            int stopBits = masterStationPort.getStopBits();
+            int parity = masterStationPort.getParity();
+            setSendPortParameters(baudRate, dataBits, stopBits, parity);
+            nextStation.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+        }*/
 
         try {
             outputStream.write(data);
@@ -229,4 +235,6 @@ public class PhysicalLayer {
     public void setDisconnecting(boolean disconnecting) {
         isDisconnecting = true;
     }
+
+    public String getPortForSendName() { return portForSendName; }
 }

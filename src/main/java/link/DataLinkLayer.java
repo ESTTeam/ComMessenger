@@ -40,6 +40,8 @@ public class DataLinkLayer implements OnPacketReceiveListener {
         wsListInitialization();
     }
 
+    public PhysicalLayer getMasterStation() { return mWsList.get(0); }
+
     private void wsListInitialization() {
         PortService portService = new PortService();
         mWsList = new ArrayList<>();
@@ -91,10 +93,9 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     public void setPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
-        for (PhysicalLayer ws : mWsList) {
+            PhysicalLayer ws = mWsList.get(0);
             ws.setSendPortParameters(baudRate, dataBits, stopBits, parity);
             ws.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
-        }
     }
 
     private void sendMarker() {

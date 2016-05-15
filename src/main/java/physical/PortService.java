@@ -45,7 +45,7 @@ public class PortService {
         }
     }
 
-    private CommPortIdentifier searchPort(String portName) {
+    public CommPortIdentifier searchPort(String portName) {
         Enumeration ports;
         ports = CommPortIdentifier.getPortIdentifiers();
         if (!ports.hasMoreElements()) {

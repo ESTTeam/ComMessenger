@@ -28,7 +28,7 @@ public class MessageToStation implements OnMessageReceiveListener {
 
     @Override
     public void onDisconnect() {
-
+        userChatWindow.dispose();
     }
 
 }
