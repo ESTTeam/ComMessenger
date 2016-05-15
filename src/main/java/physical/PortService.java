@@ -1,7 +1,6 @@
 package physical;
 
 import javax.comm.*;
-import java.util.Calendar;
 import java.util.Enumeration;
 
 public class PortService {
@@ -46,7 +45,7 @@ public class PortService {
         }
     }
 
-    private CommPortIdentifier searchPort(String portName) {
+    public CommPortIdentifier searchPort(String portName) {
         Enumeration ports;
         ports = CommPortIdentifier.getPortIdentifiers();
         if (!ports.hasMoreElements()) {

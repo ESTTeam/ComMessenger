@@ -1,5 +1,6 @@
 package physical;
 
+import link.DataLinkLayer;
 import link.OnPacketReceiveListener;
 import link.packing.Frame;
 
@@ -9,10 +10,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+import static java.lang.Thread.sleep;
+
 public class PhysicalLayer {
     private final PortService portService;
 
-    private final OnPacketReceiveListener dataLinkLayer;
+    private final DataLinkLayer dataLinkLayer;
 
     private SerialPort portForSend;
 
@@ -34,12 +37,11 @@ public class PhysicalLayer {
 
     private boolean hasDataToSend = false;
 
-    Queue<byte[]> dataToSend = new LinkedList<>();
+    final Queue<byte[]> dataToSend = new LinkedList<>();
 
     private boolean isDisconnecting = false;
 
-
-    public PhysicalLayer(OnPacketReceiveListener dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
+    public PhysicalLayer(DataLinkLayer dataLinkLayer, PortService portService, String portForSendName, String portForReceiveName) {
         this.dataLinkLayer = dataLinkLayer;
         this.portService = portService;
         this.portForSendName = portForSendName;
@@ -101,8 +103,6 @@ public class PhysicalLayer {
             portForReceive.notifyOnDataAvailable(true);
         } catch (IOException | TooManyListenersException e) {
         }
-
-
     }
 
     public void setSendPortParameters(int baudRate, int dataBits, int stopBits, int parity) {
@@ -121,14 +121,6 @@ public class PhysicalLayer {
         portService.closePort(portForReceive);
     }
 
-    public SerialPort getPortForSend() {
-        return portForSend;
-    }
-
-    public SerialPort getPortForReceive() {
-        return portForReceive;
-    }
-
     private String getPortForReceiveName() {
         return portForReceiveName;
     }
@@ -139,13 +131,31 @@ public class PhysicalLayer {
     }
 
     public synchronized void sendDataToNextStation(byte[] data) {
-        SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
-        if (nextStationPortForReceive != null) {
-            nextStation.startAsIntermediate(nextStationPortForReceive);
-            nextStation.markAsNotInUse();
+        if (!nextStation.inUse()) {
+            SerialPort nextStationPortForReceive = portService.openPort(nextStation.getPortForReceiveName());
+            if (nextStationPortForReceive != null) {
+                nextStation.startAsIntermediate(nextStationPortForReceive);
+                nextStation.markAsNotInUse();
+            } else {
+                nextStation.markAsInUse();
+            }
         } else {
-            nextStation.markAsInUse();
+            try {
+                sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
+       /* if (dataLinkLayer.getMasterStation().inUse()) {
+            SerialPort masterStationPort = portService.searchPort("COM11").
+            int baudRate = masterStationPort.getBaudRate();
+            int dataBits = masterStationPort.getDataBits();
+            int stopBits = masterStationPort.getStopBits();
+            int parity = masterStationPort.getParity();
+            setSendPortParameters(baudRate, dataBits, stopBits, parity);
+            nextStation.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
+        }*/
 
         try {
             outputStream.write(data);
@@ -183,7 +193,7 @@ public class PhysicalLayer {
         }
     }
 
-    boolean inUse() {
+    public boolean inUse() {
         return inUse;
     }
 
@@ -191,7 +201,7 @@ public class PhysicalLayer {
         return isCurrentStation;
     }
 
-    private void markAsInUse() { inUse = true; }
+    public void markAsInUse() { inUse = true; }
 
     public void markAsNotInUse() {
         inUse = false;
@@ -223,6 +233,8 @@ public class PhysicalLayer {
     }
 
     public void setDisconnecting(boolean disconnecting) {
-        isDisconnecting = disconnecting;
+        isDisconnecting = true;
     }
+
+    public String getPortForSendName() { return portForSendName; }
 }
