@@ -175,7 +175,7 @@ public class UserChatWindow extends JFrame{
         jPanel.setPreferredSize(new Dimension(800, 490));
         jPanel.setBackground(Color.GRAY);
         add(jPanel);
-       // setResizable(false);
+        setResizable(false);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
