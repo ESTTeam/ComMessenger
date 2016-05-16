@@ -118,6 +118,7 @@ public class UserChatWindow extends JFrame{
         usersWindow.setMinimumSize(new Dimension(500, 5000));
         usersWindow.setVisibleRowCount(25);
         usersWindow.setFixedCellWidth(108);
+        usersWindow.setFixedCellHeight(16);
         JScrollPane scrollPane = new JScrollPane(usersWindow);
         scrollPane.setMinimumSize(new Dimension(50, 500));
         JButton historyButton = new JButton("История");
@@ -156,6 +157,7 @@ public class UserChatWindow extends JFrame{
         exitButton.addActionListener(exitActionListener);
         usersWindow.setLayoutOrientation(JList.VERTICAL);
         messageWindow.setPreferredSize(new Dimension(777, 25));
+        messageWindow.setMaximumSize(new Dimension(777, 25));
         jPanel = new JPanel();
         jPanel.add(chatWindowPane);
         jPanel.add(scrollPane);
@@ -173,7 +175,7 @@ public class UserChatWindow extends JFrame{
         jPanel.setPreferredSize(new Dimension(800, 490));
         jPanel.setBackground(Color.GRAY);
         add(jPanel);
-        setResizable(false);
+       // setResizable(false);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
