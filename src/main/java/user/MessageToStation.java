@@ -32,6 +32,7 @@ public class MessageToStation implements OnMessageReceiveListener {
         userChatWindow.chatWindowPane.setViewportView(userChatWindow.chatWindowEmpty);
         userChatWindow.model.remove(indexRemovingUser);
         userChatWindow.stackTextArea.add(userChatWindow.userTextAreaMap.get(userName));
+        userChatWindow.userTextAreaMap.get(userName).setText("");
         userChatWindow.userTextAreaMap.remove(userName);
     }
 
@@ -54,7 +55,8 @@ public class MessageToStation implements OnMessageReceiveListener {
                 parityString = "Even";
                 break;
         }
-        showMessageDialog(null, "Параметры COM- порта были изменены:" + "\n" + "скорость = " + baudRate + "\n" + "биты данных = " + dataBits
+        showMessageDialog(null, "Параметры COM- порта были изменены:" +
+                "" + "\n" + "скорость = " + baudRate + "\n" + "биты данных = " + dataBits
                 +"\n" + "стоп биты = " + stopBits + "\n" + "биты четности " + parityString);
 
     }

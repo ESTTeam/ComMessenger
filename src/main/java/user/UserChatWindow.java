@@ -10,6 +10,9 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -40,6 +43,8 @@ public class UserChatWindow extends JFrame{
     JLabel connectionStatusLabel;
 
     JPanel jPanel;
+
+    JTextArea currArea;
 
     Map<String, JTextArea> userTextAreaMap;
 
@@ -115,12 +120,17 @@ public class UserChatWindow extends JFrame{
         usersWindow.setFixedCellWidth(108);
         JScrollPane scrollPane = new JScrollPane(usersWindow);
         scrollPane.setMinimumSize(new Dimension(50, 500));
+        JButton historyButton = new JButton("История");
+        historyButton.setEnabled(false);
+        ActionListener saveHistoryLisnter = new SaveHistoryActionListener();
+        historyButton.addActionListener(saveHistoryLisnter);
         usersWindow.addListSelectionListener(new ListSelectionListener()
         {
             public void valueChanged(ListSelectionEvent ev)
             {
                 if (!usersWindow.isSelectionEmpty()) {
-                    JTextArea currArea = userTextAreaMap.get(usersWindow.getSelectedValue().toString());
+                    historyButton.setEnabled(true);
+                    currArea = userTextAreaMap.get(usersWindow.getSelectedValue().toString());
                     chatWindowPane.setViewportView(currArea);
                 }
 
@@ -137,7 +147,6 @@ public class UserChatWindow extends JFrame{
         }
         ActionListener settingsActionListener = new SettingsActionListener();
         settingsButoon.addActionListener(settingsActionListener);
-        JButton historyButton = new JButton("История");
         JButton sendButton = new JButton("Отправить");
         getRootPane().setDefaultButton(sendButton);
         ActionListener sendMessageActionListener = new SendMessageActionListener();
@@ -216,6 +225,23 @@ public class UserChatWindow extends JFrame{
                 e1.printStackTrace();
             }
             System.exit(0);
+        }
+    }
+
+    public class SaveHistoryActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.approveSelection();
+            if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    FileWriter fw = new FileWriter(fileChooser.getSelectedFile()+".txt");
+                    fw.write(userTextAreaMap.get(usersWindow.getSelectedValue().toString()).getText().replaceAll("(?!\\r)\\n", "\r\n"));
+                    fw.write("\r\n");
+                    fw.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 

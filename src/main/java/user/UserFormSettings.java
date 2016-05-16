@@ -38,10 +38,12 @@ public class UserFormSettings extends JFrame {
         userName.setFont(fontName);
         JPanel jPanelUserName = new JPanel(new GridBagLayout());
         jPanelUserName.add(userName);
-        JButton button = new JButton("Register");
-
+        JButton button = new JButton("Зарегестрироваться");
+        JButton exitButton = new JButton("Выход");
         ActionListener actionListener = new TestActionListener();
         button.addActionListener(actionListener);
+        ActionListener exitActionListener = new ExitActionListener();
+        exitButton.addActionListener(exitActionListener);
         setNickName.add(labelNickName);
         setNickName.add(jPanelUserName);
         setNickName.setLayout(new GridLayout(3, 2, 1, 1));
@@ -59,12 +61,15 @@ public class UserFormSettings extends JFrame {
         tabbedPane.setMaximumSize(new Dimension(400, 400));
         JPanel jPanelButtonRegister= new JPanel();
         jPanelButtonRegister.add(button);
+        JPanel jPanelExit = new JPanel();
+        jPanelExit.add(exitButton);
         getRootPane().setDefaultButton(button);
         jPanelButtonRegister.setMaximumSize(new Dimension(getWidth(), 15));
 
         setNickName.add(comPort);
         setNickName.add(jPanelComPortBox);
         setNickName.add(jPanelButtonRegister);
+        setNickName.add(jPanelExit);
 
         setPreferredSize(new Dimension(520, 440));
         getSelectedComPortValue();
@@ -102,6 +107,12 @@ public class UserFormSettings extends JFrame {
                         getComPortSender(), getComPortReceiver());
                 dispose();
             }
+        }
+    }
+
+    public class ExitActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            System.exit(0);
         }
     }
 }
