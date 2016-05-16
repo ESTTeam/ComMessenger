@@ -49,7 +49,7 @@ public class UserPortSettings extends JFrame {
 
 
         Integer[] comSpeedList = {
-                300, 600, 1200, 2400, 4800, 9600, 14400, 28800, 36000, 57600, 115000
+                300, 600, 1200, 2400, 4800, 9600, 57600
         };
         comSpeedBox = new JComboBox(comSpeedList);
         comSpeedBox.setPreferredSize(new Dimension(230, 25));
@@ -70,7 +70,7 @@ public class UserPortSettings extends JFrame {
         jPanelComBitsBox.add(comBitsBox);
 
         String[] comStopBitsList = {
-                "1", "2", "1_5"
+                "1", "2"
         };
         comStopBitsBox = new JComboBox(comStopBitsList);
         comStopBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXX");
@@ -78,7 +78,7 @@ public class UserPortSettings extends JFrame {
         JPanel jPanelComStopBitsBox = new JPanel(new GridBagLayout());
         jPanelComStopBitsBox.add(comStopBitsBox);
         String[] comParityBitsList = {
-                "None", "Odd", "Even", "Mark"
+                "None", "Odd", "Even",
         };
         comParityBitsBox = new JComboBox(comParityBitsList);
         comParityBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
