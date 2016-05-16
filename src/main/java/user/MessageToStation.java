@@ -2,6 +2,8 @@ package user;
 
 import javax.swing.*;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+
 /**
  * Created by Igor on 11.05.16.
  */
@@ -36,6 +38,25 @@ public class MessageToStation implements OnMessageReceiveListener {
     @Override
     public void onDisconnect() {
         userChatWindow.dispose();
+    }
+
+    @Override
+    public void onPortParametersChanged(int baudRate, int dataBits, int stopBits, int parity) {
+        String parityString = null;
+        switch (parity) {
+            case 0:
+                parityString = "None";
+                break;
+            case 1:
+                parityString = "Odd";
+                break;
+            case 2:
+                parityString = "Even";
+                break;
+        }
+        showMessageDialog(null, "Параметры COM- порта были изменены:" + "\n" + "скорость = " + baudRate + "\n" + "биты данных = " + dataBits
+                +"\n" + "стоп биты = " + stopBits + "\n" + "биты четности " + parityString);
+
     }
 
 }

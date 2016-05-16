@@ -1,12 +1,14 @@
 package user;
 
 import link.DataLinkLayer;
+import link.NoSuchUserException;
 
 import javax.comm.SerialPort;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.*;
 
 /**
  * Created by Igor on 14.05.2016.
@@ -72,7 +74,10 @@ public class UserPortSettings extends JFrame {
         String[] comStopBitsList = {
                 "1", "2"
         };
-        comStopBitsBox = new JComboBox(comStopBitsList);
+        String[] comStopBitsList2 = {
+                "1"
+        };
+        comStopBitsBox = new JComboBox(comStopBitsList2);
         comStopBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXX");
         comStopBitsBox.setPreferredSize(new Dimension(230, 25));
         JPanel jPanelComStopBitsBox = new JPanel(new GridBagLayout());
@@ -83,6 +88,18 @@ public class UserPortSettings extends JFrame {
         comParityBitsBox = new JComboBox(comParityBitsList);
         comParityBitsBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
         comParityBitsBox.setPreferredSize(new Dimension(230, 25));
+        comBitsBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (comBitsBox.getSelectedIndex() != 0) {
+                    comStopBitsBox.setModel(new DefaultComboBoxModel<>(comStopBitsList));
+                }
+                else {
+                    comStopBitsBox.setModel(new DefaultComboBoxModel<>(comStopBitsList2));
+                }
+            }
+        });
+
         JPanel jPanelComParityBitsBox = new JPanel(new GridBagLayout());
         jPanelComParityBitsBox.add(comParityBitsBox);
         tabbedPane.setMaximumSize(new Dimension(400, 400));

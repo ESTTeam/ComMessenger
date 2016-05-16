@@ -465,46 +465,40 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     private void onPortParametersPacketReceived(byte[] packet, Frame frame) {
-        //if (frame.getSource() != mId) {
+        try {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
             System.out.println("Received PortParameters from " + (frame.getSource() + 1) + " on " + (mId + 1));
             System.out.println(calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
                     + ":" + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND));
 
-            try {
-                byte[] data = Decoder.decode(frame.getData());
+            byte[] data = Decoder.decode(frame.getData());
 
-                byte[] baudRateBytes = new byte[4];
-                byte[] dataBitsBytes = new byte[4];
-                byte[] stopBitsBytes = new byte[4];
-                byte[] parityBytes = new byte[4];
-                System.arraycopy(data, 0, baudRateBytes, 0, baudRateBytes.length);
-                System.arraycopy(data, baudRateBytes.length, dataBitsBytes, 0, dataBitsBytes.length);
-                System.arraycopy(data, baudRateBytes.length + dataBitsBytes.length, stopBitsBytes, 0, stopBitsBytes.length);
-                System.arraycopy(data, baudRateBytes.length + dataBitsBytes.length + stopBitsBytes.length, parityBytes, 0,
-                        parityBytes.length);
+            byte[] baudRateBytes = new byte[4];
+            byte[] dataBitsBytes = new byte[4];
+            byte[] stopBitsBytes = new byte[4];
+            byte[] parityBytes = new byte[4];
+            System.arraycopy(data, 0, baudRateBytes, 0, baudRateBytes.length);
+            System.arraycopy(data, baudRateBytes.length, dataBitsBytes, 0, dataBitsBytes.length);
+            System.arraycopy(data, baudRateBytes.length + dataBitsBytes.length, stopBitsBytes, 0, stopBitsBytes.length);
+            System.arraycopy(data, baudRateBytes.length + dataBitsBytes.length + stopBitsBytes.length, parityBytes, 0,
+                    parityBytes.length);
 
-                int baudRate = ByteBuffer.wrap(baudRateBytes).getInt();
-                int dataBits = ByteBuffer.wrap(dataBitsBytes).getInt();
-                int stopBits = ByteBuffer.wrap(stopBitsBytes).getInt();
-                int parity = ByteBuffer.wrap(parityBytes).getInt();
+            int baudRate = ByteBuffer.wrap(baudRateBytes).getInt();
+            int dataBits = ByteBuffer.wrap(dataBitsBytes).getInt();
+            int stopBits = ByteBuffer.wrap(stopBitsBytes).getInt();
+            int parity = ByteBuffer.wrap(parityBytes).getInt();
 
-
-                mPhysicalLayer.setReceivePortParameters(baudRate, dataBits, stopBits, parity);
-                if (mId != 0) {
-                    mPhysicalLayer.sendDataToNextStation(packet);
-                }
-                mPhysicalLayer.setSendPortParameters(baudRate, dataBits, stopBits, parity);
-                if (mId == 0) {
-                    sendMarker();
-                }
-
-
-            } catch (TransmissionFailedException e) {
-                e.printStackTrace();
+            if (frame.getSource() != mId) {
+                mPhysicalLayer.sendDataToNextStation(packet);
+                mUserLayer.onPortParametersChanged(baudRate, dataBits, stopBits, parity);
+            } else {
+                mUserLayer.onPortParametersChanged(baudRate, dataBits, stopBits, parity);
+                sendMarker();
             }
-        //}
+        } catch (TransmissionFailedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void onFirstTestPacketReceived(Frame frame) {
