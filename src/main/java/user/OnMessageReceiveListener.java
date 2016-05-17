@@ -6,4 +6,5 @@ public interface OnMessageReceiveListener {
     void onUserDelete(String userName);
     void onDisconnect();
     void onPortParametersChanged(int baudRate, int dataBits, int stopBits, int parity);
+    void onDSRLost();
 }

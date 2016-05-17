@@ -227,6 +227,11 @@ public class DataLinkLayer implements OnPacketReceiveListener {
     }
 
     @Override
+    public void onDSRLost() {
+        mUserLayer.onDSRLost();
+    }
+
+    @Override
     public void onPacketReceive(byte[] packet) {
         try {
             Frame frame = new Frame(Packer.unpack(packet));

@@ -31,6 +31,8 @@ public class PhysicalLayer {
 
     private boolean inUse;
 
+    private boolean isDSR;
+
     private boolean isCurrentStation;
 
     private PhysicalLayer nextStation;
@@ -197,6 +199,14 @@ public class PhysicalLayer {
 
     public boolean inUse() {
         return inUse;
+    }
+
+    public boolean isDSR() {
+        return isDSR;
+    }
+
+    public void setDSR() {
+        isDSR = true;
     }
 
     boolean isCurrentStation() {

@@ -27,8 +27,12 @@ class PortListener implements SerialPortEventListener {
             case SerialPortEvent.CD:
             case SerialPortEvent.CTS:
             case SerialPortEvent.DSR:
-            case SerialPortEvent.RI:
-                break;
+                if (!physicalLayer.isDSR()) {
+                    physicalLayer.setDSR();
+                } else {
+                    dataLinkLayer.onDSRLost();
+                }
+                 break;
             case SerialPortEvent.DATA_AVAILABLE:
                 if (!physicalLayer.inUse()) {
                     byte[] receivedMessage = physicalLayer.receiveDataFromPreviousStation();
